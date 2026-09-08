@@ -568,7 +568,6 @@ REGLA ABSOLUTA:
 - PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
 - Da DIRECTAMENTE el significado de la combinación.
 - SÍ haz predicciones simbólicas válidas.
--
 // ==========================================
 // LLAMADA A LA API DE GROQ (NO TOCAR ESTO)
 // ==========================================
