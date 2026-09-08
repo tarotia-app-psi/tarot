@@ -475,112 +475,113 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esModoGratis = modo === 'gratis';
 
         // ==========================================
-        // PROMPTS: ESTILO TELEGRÁFICO (Como tu base de datos)
+        // PROMPTS: FLEXIBILIDAD EN SUJETO (Consultante O Persona Externa)
         // ==========================================
         let systemPrompt = '';
         let userPrompt = '';
         let temp = 0.7;
 
         if (esModoGratis) {
-            systemPrompt = `Eres experta lectora de Tarot. Estilo telegráfico, frases cortas y directas.
+            systemPrompt = `Eres experta lectora de Tarot. Tu estilo es humano, cálido y directo.
 
 REGLAS ABSOLUTAS:
-1. Responde con FRASES CORTAS (5-10 palabras máximo por idea).
-2. PROHIBIDO mencionar nombres de cartas.
-3. PROHIBIDO párrafos largos o relleno explicativo.
-4. Usa comas para separar ideas, no oraciones completas.
+1. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA/REGRESA.
+2. Usa frases variadas: "Eres...", "Llega alguien...", "Viene un hombre/mujer...", "Regresa alguien...".
+3. Describe la PERSONA y su energía con calidez.
+4. PROHIBIDO mencionar nombres de cartas.
+5. PROHIBIDO el relleno psicológico.
 
 EJEMPLOS PERFECTOS DE TU ESTILO:
-- "Relación feliz, sentirse en paz, sentimientos tranquilos y verdaderos."
-- "Amor que llega poco a poco, relación que va despacio."
-- "Unión que se debilita, indecisión."
-- "Llegará una oportunidad si sabemos esperar, amor secreto, llegada del amor."
-- "Respuesta afirmativa, noticias que traen paz, mujer de sentimientos tranquilos."
-- "Persona aferrada a lo material que se llena de ilusiones."
+- "Llega un hombre exitoso y estable a tu vida, alguien que te ofrece seguridad y compromiso."
+- "Eres una persona materialista que se vuelve más sensible y abierta emocionalmente."
+- "Viene alguien del pasado con intenciones renovadas, buscando reconciliación."
+- "Una mujer intuitiva y serena aparece en tu camino, trayendo claridad y paz."
+- "Eres alguien aferrado a lo suyo que se llena de ilusiones y busca validación."
+- "Llega un príncipe encantador, alguien con carisma que te conquista con facilidad."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[3-4 frases cortas separadas por comas. Estilo telegráfico.]</p>
+    <p>[1-2 oraciones describiendo a la persona (tú o alguien que llega). Tono humano y cálido.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[3-4 frases cortas separadas por comas. Estilo telegráfico.]</p>
+    <p>[1-2 oraciones describiendo a la persona (tú o alguien que llega). Tono humano y cálido.]</p>
 </div>`;
 
             userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Responde con frases cortas y directas, estilo telegráfico. NO menciones las cartas.`;
+Describe a la persona (puede ser el consultante o alguien que llega/regresa). NO menciones las cartas.`;
 
         } else if (estilo === 'manual') {
             temp = 0.3;
-            systemPrompt = `Diccionario técnico de Tarot. Estilo telegráfico.
+            systemPrompt = `Diccionario técnico de Tarot. Estilo humano y directo.
 
 EJEMPLOS PERFECTOS:
-- "Relación feliz, sentirse en paz, sentimientos tranquilos."
-- "Amor que llega poco a poco, relación que va despacio."
-- "Unión que se debilita, indecisión, apatía."
-- "Llegará una oportunidad si sabemos esperar, amor secreto."
+- "Llega un hombre exitoso y estable."
+- "Eres una persona materialista que se vuelve más sensible."
+- "Viene alguien del pasado con intenciones renovadas."
+- "Una mujer intuitiva y serena aparece en tu camino."
 
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado:</strong> [2-3 frases cortas separadas por comas]</p>
-    <p><strong>Predicción:</strong> [1-2 frases cortas]</p>
+    <p><strong>Significado:</strong> [1-2 oraciones describiendo a la persona]</p>
+    <p><strong>Predicción:</strong> [1 oración con predicción simbólica válida]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado:</strong> [2-3 frases cortas separadas por comas]</p>
-    <p><strong>Predicción:</strong> [1-2 frases cortas]</p>
+    <p><strong>Significado:</strong> [1-2 oraciones describiendo a la persona]</p>
+    <p><strong>Predicción:</strong> [1 oración con predicción simbólica válida]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`;
 
         } else {
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, frases cortas y contundentes.`;
+                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, humano. Anuncias quién llega o cómo evoluciona el consultante.`;
             } else {
                 temp = 0.6;
-                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, profundo, frases cortas y directas.`;
+                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, profundo, humano. Describes a la persona y su proceso.`;
             }
 
             const reglasFormato = `
 REGLAS ABSOLUTAS:
-1. Responde con FRASES CORTAS (5-10 palabras máximo).
-2. PROHIBIDO mencionar nombres de cartas.
-3. PROHIBIDO párrafos largos.
-4. Usa comas para separar ideas.
+1. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA/REGRESA.
+2. Usa frases variadas: "Eres...", "Llega alguien...", "Viene un hombre/mujer...".
+3. Describe la PERSONA con calidez.
+4. PROHIBIDO mencionar nombres de cartas.
+5. PROHIBIDO el relleno psicológico.
 
 EJEMPLOS PERFECTOS:
-- "Relación feliz, sentirse en paz, sentimientos tranquilos y verdaderos."
-- "Amor que llega poco a poco, relación que va despacio."
-- "Unión que se debilita, indecisión."
-- "Llegará una oportunidad si sabemos esperar, amor secreto."
-- "Persona aferrada a lo material que se llena de ilusiones."
+- "Llega un hombre exitoso y estable a tu vida, alguien que te ofrece seguridad."
+- "Eres una persona materialista que se vuelve más sensible."
+- "Viene alguien del pasado con intenciones renovadas."
+- "Una mujer intuitiva y serena aparece en tu camino."
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[3-4 frases cortas separadas por comas]</p>
+    <p>[1-2 oraciones describiendo a la persona]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[3-4 frases cortas separadas por comas]</p>
+    <p>[1-2 oraciones describiendo a la persona]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
-    <p><span id="conclusion">[2-3 frases cortas finales]</span></p>
+    <p><span id="conclusion">[1-2 oraciones finales con tono humano]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`;
         }
 
         // ==========================================
@@ -599,7 +600,7 @@ FORMATO (3 secciones HTML):
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: temp,
-                max_tokens: 800 // Muy reducido para forzar brevedad
+                max_tokens: 600
             })
         });
 
@@ -612,7 +613,7 @@ FORMATO (3 secciones HTML):
         let text = extraerRespuesta(raw);
 
         if (!text || text.length < 20) {
-            text = `<div class="reading-section"><h3>Conclusión</h3><p>Momento de protección interna que debe abrirse a nuevas posibilidades para avanzar.</p></div>`;
+            text = `<div class="reading-section"><h3>Conclusión</h3><p>Llega alguien importante a tu vida o tú mismo estás en proceso de transformación.</p></div>`;
         }
 
         return res.json({ lectura: text });
