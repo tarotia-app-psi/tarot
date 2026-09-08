@@ -482,7 +482,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
 // ==========================================
 
 // ==========================================
-// PROMPTS: DUPLAS COMO UNIDAD (SIN MENCIONAR CARTAS INDIVIDUALES)
+// PROMPTS: DUPLAS COMO UNIDAD (Cartas enviadas, pero no mencionadas en la respuesta)
 // ==========================================
 
 let systemPrompt = '';
@@ -492,43 +492,40 @@ let temp = 0.7;
 if (esModoGratis) {
     systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono directo y predictivo.
 
-REGLA ABSOLUTA:
-- Interpreta la dupla como UNA SOLA ENERGÍA COMBINADA
-- PROHIBIDO mencionar las cartas individualmente (NO digas "el 4 de Oros significa..." o "la energía del 7 de Copas...")
-- Da DIRECTAMENTE el significado de la combinación
+REGLA ABSOLUTA DE FORMATO:
+- Interpreta la dupla como UNA SOLA ENERGÍA COMBINADA.
+- PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta (NO digas "el 4 de Oros significa..." o "la energía del 7 de Copas...").
+- Da DIRECTAMENTE el significado de la combinación.
 
-EJEMPLOS CORRECTOS:
-- 4 de Oros + 7 de Copas = "Persona aferrada a lo suyo que se llena de ilusiones, o alguien materialista que se vuelve más sensible. Proteges tu estabilidad pero te pierdes en fantasías."
-- Templanza + Sota de Oros = "Un nuevo amor está por llegar con calma, o nuevos estudios avanzan con pasos firmes."
-- Diablo + 8 de Oros = "Persona que sale de los vicios y se aplica al trabajo con dedicación."
-
-EJEMPLO INCORRECTO (NO HAGAS ESTO):
-❌ "La energía del 4 de Oros te mantiene aferrado, mientras que el 7 de Copas abre ilusiones..."
+EJEMPLOS CORRECTOS DE RESPUESTA:
+- "Persona aferrada a lo suyo que se llena de ilusiones, o alguien materialista que se vuelve más sensible. Proteges tu estabilidad pero te pierdes en fantasías."
+- "Un nuevo amor está por llegar con calma, o nuevos estudios avanzan con pasos firmes."
+- "Sales de los vicios y te aplicas al trabajo con dedicación, dejando atrás la vagancia."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas individualmente.]</p>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas individualmente.]</p>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
 </div>`;
 
     userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
-Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}.
-Da el significado DIRECTO de cada combinación. NO menciones las cartas individualmente. Haz predicciones simbólicas válidas.`;
+Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
+Da el significado DIRECTO de estas combinaciones. NO menciones los nombres de las cartas en tu respuesta. Haz predicciones simbólicas válidas.`;
 
 } else if (estilo === 'manual') {
     temp = 0.3;
     systemPrompt = `Diccionario técnico de Tarot.
 
 REGLA ABSOLUTA:
-- Interpreta la dupla como UNA SOLA ENERGÍA
-- PROHIBIDO mencionar cartas individuales
-- Da el significado directo de la combinación
+- Interpreta la dupla como UNA SOLA ENERGÍA.
+- PROHIBIDO mencionar los nombres de las cartas individuales en la respuesta.
+- Da el significado directo de la combinación.
 
-Ejemplo: 4 de Oros + 7 de Copas = "Persona aferrada a lo suyo que se llena de ilusiones, materialista que se vuelve más sensible."
+Ejemplo de respuesta correcta: "Persona aferrada a lo suyo que se llena de ilusiones, materialista que se vuelve más sensible."
 
 FORMATO:
 <div class="reading-section">
@@ -545,8 +542,8 @@ FORMATO:
 </div>`;
 
     userPrompt = esPreguntaEspecifica 
-        ? `Pregunta: "${preguntaLimpia}". Da el significado directo de ${a}+${b} y ${c}+${d} como combinaciones. NO menciones cartas individuales.`
-        : `Tema: ${tema}. Da el significado directo de ${a}+${b} y ${c}+${d} como combinaciones. NO menciones cartas individuales.`;
+        ? `Pregunta: "${preguntaLimpia}". Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`
+        : `Tema: ${tema}. Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`;
 
 } else {
     let personalidad = '';
@@ -567,32 +564,11 @@ FORMATO:
 
     const reglasFormato = `
 REGLA ABSOLUTA:
-- Interpreta cada dupla como UNA SOLA ENERGÍA COMBINADA
-- PROHIBIDO mencionar las cartas individualmente (NO digas "el 4 de Oros..." o "la energía del 7 de Copas...")
-- Da DIRECTAMENTE el significado de la combinación
-- SÍ haz predicciones simbólicas válidas
-- NO inventes datos falsos
-
-FORMATO (3 secciones HTML):
-<div class="reading-section">
-    <h3>Dupla 1: Tu Presente</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas.]</p>
-</div>
-<div class="reading-section">
-    <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas.]</p>
-</div>
-<div class="reading-section">
-    <h3>Conclusión</h3>
-    <p><span id="conclusion">[Síntesis final que conecte presente y futuro. 3-4 oraciones.]</span></p>
-</div>`;
-
-    systemPrompt = personalidad + reglasFormato;
-    
-    userPrompt = esPreguntaEspecifica 
-        ? `Pregunta: "${preguntaLimpia}". Da el significado directo de las combinaciones. NO menciones las cartas individualmente.`
-        : `Tema: ${tema}. Da el significado directo de las combinaciones. NO menciones las cartas individualmente.`;
-}
+- Interpreta cada dupla como UNA SOLA ENERGÍA COMBINADA.
+- PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
+- Da DIRECTAMENTE el significado de la combinación.
+- SÍ haz predicciones simbólicas válidas.
+-
 // ==========================================
 // LLAMADA A LA API DE GROQ (NO TOCAR ESTO)
 // ==========================================
