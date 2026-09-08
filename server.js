@@ -477,9 +477,8 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         // ==========================================
 // PROMPTS OPTIMIZADOS (MENOS TOKENS, MISMA CALIDAD)
 // ==========================================
-
 // ==========================================
-// PROMPTS EQUILIBRADOS (Concretos sin inventar)
+// PROMPTS EQUILIBRADOS Y DIFERENCIADOS POR ESTILO
 // ==========================================
 
 let systemPrompt = '';
@@ -520,7 +519,6 @@ FORMATO (2 secciones HTML):
 
     userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}.
-
 Describe la energía y transformación de cada dupla. NO inventes datos ni escenarios específicos.`;
 
 } else if (estilo === 'manual') {
@@ -552,11 +550,23 @@ FORMATO:
         : `Tema: ${tema}. Interpreta ${a}+${b} y ${c}+${d}. Describe energía y transformación. NO inventes datos.`;
 
 } else {
-    temp = 0.75;
+    // AQUÍ ESTÁ LA DIFERENCIACIÓN REAL ENTRE MÁGICO Y FILOSÓFICO
+    let personalidad = '';
     
-    const personalidad = (estilo === 'morgana' || estilo === 'magico')
-        ? `Eres Morgana, experta en Tarot. Tono directo, místico y claro. Describes energías y transformaciones sin inventar detalles ficticios.`
-        : `Eres terapeuta experto en Tarot. Tono empático y claro. Describes patrones de energía sin inventar escenarios específicos.`;
+    if (estilo === 'morgana' || estilo === 'magico') {
+        temp = 0.8; // Más creatividad para predicciones
+        personalidad = `Eres Morgana, vidente experta en Tarot. 
+        TU ESTILO: Directo, místico y predictivo. Hablas de fuerzas externas, destino y eventos que se avecinan. 
+        VOCABULARIO: Usa frases como "El oráculo revela", "se avecina un cambio", "el destino te prepara", "una energía externa llega". 
+        ENFOQUE: Predice movimientos concretos basados en la energía de las cartas.`;
+    } else {
+        // estilo === 'filosofico'
+        temp = 0.6; // Menos aleatoriedad, más profundidad y coherencia
+        personalidad = `Eres un terapeuta experto en Tarot Evolutivo y psicología junguiana. 
+        TU ESTILO: Empático, reflexivo y profundo. Hablas de patrones internos, sombras y crecimiento del alma. 
+        VOCABULARIO: Usa frases como "Esta combinación te invita a reflexionar", "tu patrón inconsciente", "tu sombra te muestra", "proceso de sanación interna". 
+        ENFOQUE: No predigas eventos externos; describe el viaje interior y las lecciones que el consultante debe integrar.`;
+    }
 
     const reglasFormato = `
 DUPLAS: Carta1=tipo de persona/energía base, Carta2=energía transformadora.
@@ -575,12 +585,12 @@ FORMATO (4 secciones HTML):
     <p>[Qué energía/persona eres (${c}) + qué te transforma (${d}) + resultado claro. 4-6 oraciones.]</p>
 </div>
 <div class="reading-section">
-    <h3>Predicciones del Oráculo</h3>
-    <p>[2-3 predicciones basadas en las energías de las cartas. 4 oraciones. NO inventes datos específicos.]</p>
+    <h3>${estilo === 'filosofico' ? 'Reflexión del Alma' : 'Predicciones del Oráculo'}</h3>
+    <p>[${estilo === 'filosofico' ? 'Una reflexión profunda sobre el patrón interno a sanar.' : '2-3 predicciones basadas en las energías de las cartas.'} 4 oraciones. NO inventes datos específicos.]</p>
 </div>
 <div class="reading-section">
     <h3>Consejo y Conclusión</h3>
-    <p><span id="conclusion">[Consejo práctico basado en las cartas. 3 oraciones.]</span></p>
+    <p><span id="conclusion">[Consejo práctico basado en las cartas, adaptado a tu estilo (${estilo}). 3 oraciones.]</span></p>
 </div>`;
 
     systemPrompt = personalidad + reglasFormato;
@@ -589,6 +599,10 @@ FORMATO (4 secciones HTML):
         ? `Pregunta: "${preguntaLimpia}". Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Describe energía y transformación. NO inventes datos ni escenarios.`
         : `Tema: ${tema}. Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Describe energía y transformación. NO inventes datos ni escenarios.`;
 }
+
+// ==========================================
+// LLAMADA A LA API DE GROQ (NO TOCAR ESTO)
+// ==========================================
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
