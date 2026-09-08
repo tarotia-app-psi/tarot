@@ -475,94 +475,112 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esModoGratis = modo === 'gratis';
 
         // ==========================================
-        // PROMPTS: DUPLAS COMO UNIDAD
+        // PROMPTS: ESTILO TELEGRÁFICO (Como tu base de datos)
         // ==========================================
         let systemPrompt = '';
         let userPrompt = '';
         let temp = 0.7;
 
         if (esModoGratis) {
-            systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono directo y predictivo.
+            systemPrompt = `Eres experta lectora de Tarot. Estilo telegráfico, frases cortas y directas.
 
-REGLA ABSOLUTA DE FORMATO:
-- Interpreta la dupla como UNA SOLA ENERGÍA COMBINADA.
-- PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
-- Da DIRECTAMENTE el significado de la combinación.
+REGLAS ABSOLUTAS:
+1. Responde con FRASES CORTAS (5-10 palabras máximo por idea).
+2. PROHIBIDO mencionar nombres de cartas.
+3. PROHIBIDO párrafos largos o relleno explicativo.
+4. Usa comas para separar ideas, no oraciones completas.
 
-EJEMPLOS CORRECTOS DE RESPUESTA:
-- "Persona aferrada a lo suyo que se llena de ilusiones, o alguien materialista que se vuelve más sensible."
-- "Un nuevo amor está por llegar con calma, o nuevos estudios avanzan con pasos firmes."
+EJEMPLOS PERFECTOS DE TU ESTILO:
+- "Relación feliz, sentirse en paz, sentimientos tranquilos y verdaderos."
+- "Amor que llega poco a poco, relación que va despacio."
+- "Unión que se debilita, indecisión."
+- "Llegará una oportunidad si sabemos esperar, amor secreto, llegada del amor."
+- "Respuesta afirmativa, noticias que traen paz, mujer de sentimientos tranquilos."
+- "Persona aferrada a lo material que se llena de ilusiones."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
+    <p>[3-4 frases cortas separadas por comas. Estilo telegráfico.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
+    <p>[3-4 frases cortas separadas por comas. Estilo telegráfico.]</p>
 </div>`;
 
             userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
-Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Da el significado DIRECTO de estas combinaciones. NO menciones los nombres de las cartas en tu respuesta.`;
+Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
+Responde con frases cortas y directas, estilo telegráfico. NO menciones las cartas.`;
 
         } else if (estilo === 'manual') {
             temp = 0.3;
-            systemPrompt = `Diccionario técnico de Tarot.
+            systemPrompt = `Diccionario técnico de Tarot. Estilo telegráfico.
 
-REGLA ABSOLUTA: Interpreta la dupla como UNA SOLA ENERGÍA. PROHIBIDO mencionar nombres de cartas individuales.
+EJEMPLOS PERFECTOS:
+- "Relación feliz, sentirse en paz, sentimientos tranquilos."
+- "Amor que llega poco a poco, relación que va despacio."
+- "Unión que se debilita, indecisión, apatía."
+- "Llegará una oportunidad si sabemos esperar, amor secreto."
 
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado 1:</strong> [Interpretación directa de la combinación]</p>
-    <p><strong>Significado 2:</strong> [Otra perspectiva de la combinación]</p>
-    <p><strong>Significado 3:</strong> [Predicción simbólica válida]</p>
+    <p><strong>Significado:</strong> [2-3 frases cortas separadas por comas]</p>
+    <p><strong>Predicción:</strong> [1-2 frases cortas]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado 1:</strong> [Interpretación directa de la combinación]</p>
-    <p><strong>Significado 2:</strong> [Otra perspectiva de la combinación]</p>
-    <p><strong>Significado 3:</strong> [Predicción simbólica válida]</p>
+    <p><strong>Significado:</strong> [2-3 frases cortas separadas por comas]</p>
+    <p><strong>Predicción:</strong> [1-2 frases cortas]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`
-                : `Tema: ${tema}. Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`;
 
         } else {
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `Eres Morgana, vidente experta en Tarot. TU ESTILO: Directo, místico y predictivo. VOCABULARIO: "El oráculo revela que llega...", "se avecina un nuevo amor". ENFOQUE: Predicciones simbólicas concretas.`;
+                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, frases cortas y contundentes.`;
             } else {
                 temp = 0.6;
-                personalidad = `Eres un terapeuta experto en Tarot Evolutivo. TU ESTILO: Empático, reflexivo y profundo. VOCABULARIO: "Esta combinación indica que...", "tu interior se abre a recibir...". ENFOQUE: Cómo evoluciona el consultante según la energía combinada.`;
+                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, profundo, frases cortas y directas.`;
             }
 
             const reglasFormato = `
-REGLA ABSOLUTA: Interpreta cada dupla como UNA SOLA ENERGÍA COMBINADA. PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
+REGLAS ABSOLUTAS:
+1. Responde con FRASES CORTAS (5-10 palabras máximo).
+2. PROHIBIDO mencionar nombres de cartas.
+3. PROHIBIDO párrafos largos.
+4. Usa comas para separar ideas.
+
+EJEMPLOS PERFECTOS:
+- "Relación feliz, sentirse en paz, sentimientos tranquilos y verdaderos."
+- "Amor que llega poco a poco, relación que va despacio."
+- "Unión que se debilita, indecisión."
+- "Llegará una oportunidad si sabemos esperar, amor secreto."
+- "Persona aferrada a lo material que se llena de ilusiones."
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
+    <p>[3-4 frases cortas separadas por comas]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
+    <p>[3-4 frases cortas separadas por comas]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
-    <p><span id="conclusion">[Síntesis final que conecte presente y futuro. 3-4 oraciones.]</span></p>
+    <p><span id="conclusion">[2-3 frases cortas finales]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`
-                : `Tema: ${tema}. Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Estilo telegráfico.`;
         }
 
         // ==========================================
@@ -581,7 +599,7 @@ FORMATO (3 secciones HTML):
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: temp,
-                max_tokens: 2500
+                max_tokens: 800 // Muy reducido para forzar brevedad
             })
         });
 
@@ -593,8 +611,8 @@ FORMATO (3 secciones HTML):
         const raw = data.choices[0].message?.content || '';
         let text = extraerRespuesta(raw);
 
-        if (!text || text.length < 30) {
-            text = `<div class="reading-section"><h3>Conclusion</h3><p>La combinación de cartas indica que la situación actual requiere atención y reflexión profunda para avanzar hacia un nuevo horizonte.</p></div>`;
+        if (!text || text.length < 20) {
+            text = `<div class="reading-section"><h3>Conclusión</h3><p>Momento de protección interna que debe abrirse a nuevas posibilidades para avanzar.</p></div>`;
         }
 
         return res.json({ lectura: text });
