@@ -2,10 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit'); // NUEVO: Protección contra abusos
 require('dotenv').config();
 
 const app = express();
 
+// Configuración de CORS (solo permite tus dominios)
 const corsOptions = {
     origin: [
         'https://tarot-ia.netlify.app',
@@ -22,22 +24,29 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
-app.use(express.static(__dirname));
 
-// En tu server.js, asegúrate de que la URI incluya el nombre de la base de datos:
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://edu1826_db_user:GATO8objeto@cluster0.39xxpjk.mongodb.net/tarotApp?retryWrites=true&w=majority";
-const MODEL_NAME = process.env.MODEL_NAME || 'openai/gpt-oss-20b';
-const API_KEY = process.env.GROQ_API_KEY || process.env.API_KEY;
+// ⚠️ ELIMINADO: app.use(express.static(__dirname)); 
+// Ya no es necesario ni seguro, ya que tu frontend está en otra carpeta/repositorio.
+
+// 🔒 CORRECCIÓN CRÍTICA 1: Sin fallbacks de contraseñas. Si no están en Render, el servidor se detiene.
+const MONGO_URI = process.env.MONGO_URI;
+const MODEL_NAME = process.env.MODEL_NAME || 'llama3-70b-8192'; // Modelo real de Groq
+const API_KEY = process.env.GROQ_API_KEY;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
-const JWT_SECRET = process.env.JWT_SECRET || 'tarotia-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
 const MAX_MUESTRAS_FISICAS = 5;
 
-console.log('CONFIG SERVIDOR:');
-console.log('  MODEL_NAME:', MODEL_NAME);
-console.log('  API_KEY existe:', !!API_KEY);
-console.log('  ADMIN_TOKEN existe:', !!ADMIN_TOKEN);
-console.log('  MONGO_URI existe:', !!MONGO_URI);
+// Validación de seguridad al iniciar
+if (!MONGO_URI || !API_KEY || !ADMIN_TOKEN || !JWT_SECRET) {
+    console.error("❌ ERROR CRÍTICO: Faltan variables de entorno (MONGO_URI, GROQ_API_KEY, ADMIN_TOKEN, JWT_SECRET). Revisa Render.com");
+    process.exit(1); // Detiene el servidor para no operar de forma insegura
+}
 
+console.log('✅ CONFIG SERVIDOR: Variables de entorno cargadas correctamente.');
+
+// ==========================================
+// SCHEMAS DE MONGOOSE
+// ==========================================
 const UsuarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -59,7 +68,6 @@ const CodigoPremiumSchema = new mongoose.Schema({
 
 const CodigoPremium = mongoose.models.CodigoPremium || mongoose.model('CodigoPremium', CodigoPremiumSchema);
 
-// Schema explícito para duplas conectando directamente a la colección 'duplas' sin índices duplicados
 const DuplaSchema = new mongoose.Schema({
     claveBuscador: { type: String, required: true },
     cartaA: { type: String, required: true },
@@ -73,32 +81,18 @@ DuplaSchema.index({ cartaA: 1, cartaB: 1 });
 
 const Dupla = mongoose.models.Dupla || mongoose.model('Dupla', DuplaSchema);
 
-if (MONGO_URI) {
-    mongoose.connect(MONGO_URI)
-        .then(async () => {
-            console.log("Conectado a MongoDB Atlas con éxito.");
-            try {
-                const count = await Dupla.countDocuments();
-                console.log(`📊 [DIAGNÓSTICO] Documentos encontrados mediante modelo Dupla: ${count}`);
-                
-                if (count > 0) {
-                    const sample = await Dupla.findOne({});
-                    console.log("🔍 [DIAGNÓSTICO] Muestra exacta leída por el modelo Dupla:", sample);
-                } else {
-                    console.log("⚠️ [DIAGNÓSTICO] ¡La colección del modelo Dupla está vacía!");
-                }
-            } catch (e) {
-                console.error("❌ Error en diagnóstico del modelo:", e);
-            }
-        })
-        .catch(err => console.error('Error MongoDB:', err.message));
-} else {
-    console.warn('MONGO_URI no configurada.');
-}
+// ==========================================
+// CONEXIÓN A BASE DE DATOS
+// ==========================================
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ Conectado a MongoDB Atlas con éxito."))
+    .catch(err => console.error('❌ Error MongoDB:', err.message));
 
+// ==========================================
+// MIDDLEWARES DE SEGURIDAD
+// ==========================================
 function verificarAdmin(req, res, next) {
     const token = req.headers['x-admin-token'];
-    if (!ADMIN_TOKEN) return res.status(500).json({ error: 'Configuracion incompleta.' });
     if (!token || token !== ADMIN_TOKEN) return res.status(403).json({ error: 'Acceso denegado.' });
     next();
 }
@@ -115,6 +109,16 @@ function verificarAuth(req, res, next) {
     }
 }
 
+// 🔒 CORRECCIÓN CRÍTICA 2: Rate Limiting para proteger tu cuota de Groq
+const tiradaLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 15, // Máximo 15 tiradas por IP cada 15 minutos
+    message: { error: 'Demasiadas solicitudes. Por favor, espera unos minutos antes de consultar de nuevo.' }
+});
+
+// ==========================================
+// RUTAS DE AUTENTICACIÓN
+// ==========================================
 app.post('/api/auth/registrar', async (req, res) => {
     const { nombre, email } = req.body;
     if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -223,11 +227,14 @@ app.get('/api/auth/perfil', verificarAuth, async (req, res) => {
         res.status(500).json({ error: 'Error al obtener perfil.' });
     }
 });
-// Ruta de Keep-Alive para evitar que Render se duerma
+
 app.get('/api/ping', (req, res) => {
     res.status(200).send('¡Servidor despierto y operativo! 🔮');
 });
 
+// ==========================================
+// RUTAS DE CÓDIGOS PREMIUM
+// ==========================================
 app.post('/api/auth/canjear-codigo', verificarAuth, async (req, res) => {
     const { codigo } = req.body;
     if (!codigo) return res.status(400).json({ error: 'Codigo requerido.' });
@@ -235,35 +242,10 @@ app.post('/api/auth/canjear-codigo', verificarAuth, async (req, res) => {
     const codigoLimpio = codigo.trim().toUpperCase();
 
     try {
-        const codigosAdmin = ['ADMIN2026', 'PASEMISTICO', 'TAROTGRATIS'];
-
-        if (codigosAdmin.includes(codigoLimpio)) {
-            const usuario = await Usuario.findById(req.usuario.userId);
-            usuario.plan = 'Premium';
-            usuario.codigoPremiumUsado = codigoLimpio;
-            await usuario.save();
-
-            const nuevoToken = jwt.sign(
-                { userId: usuario._id, email: usuario.email, plan: usuario.plan },
-                JWT_SECRET,
-                { expiresIn: '30d' }
-            );
-
-            return res.json({
-                mensaje: 'Codigo premium activado con exito.',
-                token: nuevoToken,
-                usuario: {
-                    id: usuario._id,
-                    nombre: usuario.nombre,
-                    email: usuario.email,
-                    plan: usuario.plan,
-                    totalTiradas: usuario.totalTiradas,
-                    muestrasFisicasRestantes: Math.max(0, MAX_MUESTRAS_FISICAS - usuario.muestrasFisicasUsadas)
-                }
-            });
-        }
-
+        // 🔒 CORRECCIÓN CRÍTICA 3: Eliminados los códigos hardcodeados. 
+        // Ahora TODO pasa por la base de datos para tener auditoría y seguridad real.
         const codigoDB = await CodigoPremium.findOne({ codigo: codigoLimpio });
+        
         if (!codigoDB) return res.status(400).json({ error: 'Codigo invalido.' });
         if (codigoDB.usado) return res.status(400).json({ error: 'Codigo ya utilizado.' });
 
@@ -292,7 +274,7 @@ app.post('/api/auth/canjear-codigo', verificarAuth, async (req, res) => {
                 email: usuario.email,
                 plan: usuario.plan,
                 totalTiradas: usuario.totalTiradas,
-                muestrasFisicasRestantes: Math.max(0, MAX_MUESTRAS_FISICAS - usuario.muestrasFisicasUsadas)
+                muestrasFisicasRestantes: 999
             }
         });
     } catch (error) {
@@ -301,21 +283,19 @@ app.post('/api/auth/canjear-codigo', verificarAuth, async (req, res) => {
     }
 });
 
+// ==========================================
+// RUTAS DE TIRADAS
+// ==========================================
 app.post('/api/tiradas/usar-muestra', verificarAuth, async (req, res) => {
     try {
         const usuario = await Usuario.findById(req.usuario.userId);
-
         if (usuario.plan === 'Premium') {
             return res.json({ premium: true, muestrasRestantes: 999 });
         }
 
         const restantes = Math.max(0, MAX_MUESTRAS_FISICAS - usuario.muestrasFisicasUsadas);
         if (restantes <= 0) {
-            return res.status(403).json({ 
-                error: 'Muestras agotadas.', 
-                muestrasRestantes: 0,
-                premium: false 
-            });
+            return res.status(403).json({ error: 'Muestras agotadas.', muestrasRestantes: 0, premium: false });
         }
 
         usuario.muestrasFisicasUsadas += 1;
@@ -335,9 +315,7 @@ app.get('/api/tiradas/muestras', verificarAuth, async (req, res) => {
         const usuario = await Usuario.findById(req.usuario.userId);
         res.json({
             premium: usuario.plan === 'Premium',
-            muestrasRestantes: usuario.plan === 'Premium' 
-                ? 999 
-                : Math.max(0, MAX_MUESTRAS_FISICAS - usuario.muestrasFisicasUsadas)
+            muestrasRestantes: usuario.plan === 'Premium' ? 999 : Math.max(0, MAX_MUESTRAS_FISICAS - usuario.muestrasFisicasUsadas)
         });
     } catch (error) {
         res.status(500).json({ error: 'Error al consultar muestras.' });
@@ -364,14 +342,11 @@ app.get('/api/duplas/buscar', async (req, res) => {
         const cartaA = a.trim();
         const cartaB = b.trim();
         
-        // Solo buscamos en el orden exacto: cartaA primero y cartaB después
         const claves = [
-            `"${cartaA}"|"${cartaB}"`,  // Con comillas (como están en MongoDB)
-            `${cartaA}|${cartaB}`       // Sin comillas (por si acaso)
+            `"${cartaA}"|"${cartaB}"`,
+            `${cartaA}|${cartaB}`
         ];
         
-        console.log(`🔍 Buscando (orden exacto):`, claves);
-
         let dupla = await Dupla.findOne({
             $or: claves.map(clave => ({ claveBuscador: clave }))
         });
@@ -413,46 +388,8 @@ function extraerRespuesta(texto) {
     return texto.trim();
 }
 
-mongoose.connection.once('open', async () => {
-    console.log("✅ Conectado a MongoDB Atlas con éxito.");
-    
-    try {
-        const db = mongoose.connection.db;
-        
-        // 1. Verificar qué colecciones existen
-        const colecciones = await db.listCollections().toArray();
-        console.log("📚 Colecciones disponibles:");
-        colecciones.forEach(c => console.log(`   - ${c.name}`));
-        
-        // 2. Verificar directamente en la colección 'duplas'
-        const coleccionDuplas = db.collection('duplas');
-        const countDirecto = await coleccionDuplas.countDocuments();
-        console.log(`📊 [DIRECTO] Documentos en 'duplas': ${countDirecto}`);
-        
-        if (countDirecto > 0) {
-            // 3. Obtener un ejemplo para ver la estructura
-            const ejemplo = await coleccionDuplas.findOne({});
-            console.log("📄 Ejemplo de documento:");
-            console.log(JSON.stringify(ejemplo, null, 2));
-            
-            // 4. Verificar el modelo de Mongoose
-            const countModelo = await Dupla.countDocuments();
-            console.log(`📊 [MODELO] Documentos en modelo Dupla: ${countModelo}`);
-            
-            if (countModelo === 0) {
-                console.log("⚠️ ¡INCONSISTENCIA! El modelo no ve los datos.");
-                console.log("   - Posible causa: El modelo está usando otra colección o base de datos.");
-                
-                // 5. Verificar el nombre de la colección en el modelo
-                console.log(`   - Colección en el modelo: "${Dupla.collection.name}"`);
-                console.log(`   - Base de datos en el modelo: "${Dupla.db.name}"`);
-            }
-        }
-    } catch (error) {
-        console.error("❌ Error en diagnóstico:", error);
-    }
-});
-app.post('/tirada', async (req, res) => {
+// 🔒 CORRECCIÓN CRÍTICA 4: Aplicar el rate limiter a la ruta de la IA
+app.post('/tirada', tiradaLimiter, async (req, res) => {
     let { tema, a, b, c, d, estilo = 'filosofico', pregunta, cartas, modo } = req.body;
     if (!a && cartas && Array.isArray(cartas) && cartas.length >= 4) {
         a = cartas[0]; b = cartas[1]; c = cartas[2]; d = cartas[3];
@@ -570,6 +507,9 @@ Devuelve la respuesta EXACTAMENTE en este formato HTML:
     }
 });
 
+// ==========================================
+// RUTAS DE ADMINISTRACIÓN
+// ==========================================
 app.get('/api/admin/clientes', verificarAdmin, async (req, res) => {
     try {
         const clientes = await Usuario.find({}, { __v: 0 }).sort({ createdAt: -1 }).limit(100);
@@ -610,5 +550,5 @@ app.post('/api/admin/crear-codigo', verificarAdmin, async (req, res) => {
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+    console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
