@@ -474,119 +474,116 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esPreguntaEspecifica = (tema === 'Pregunta Especifica' || tema === 'Pregunta Específica') && preguntaLimpia.length > 0;
         const esModoGratis = modo === 'gratis';
 
-        // ==========================================
-        // PROMPTS: FLEXIBILIDAD EN SUJETO (Consultante O Persona Externa)
-        // ==========================================
         let systemPrompt = '';
         let userPrompt = '';
         let temp = 0.7;
 
         if (esModoGratis) {
-            systemPrompt = `Eres experta lectora de Tarot. Tu estilo es humano, cálido y directo.
+            systemPrompt = `Eres experta lectora de Tarot. Estilo humano, cálido, directo y CONCRETO.
 
 REGLAS ABSOLUTAS:
-1. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA/REGRESA.
-2. Usa frases variadas: "Eres...", "Llega alguien...", "Viene un hombre/mujer...", "Regresa alguien...".
-3. Describe la PERSONA y su energía con calidez.
+1. Usa palabras CONCRETAS y DIRECTAS (materialista, sensible, exitoso, feliz, intuitivo).
+2. NO uses frases abstractas como "guarda con firmeza lo que considera seguro".
+3. Las cartas pueden describir AL CONSULTANTE ("Eres...") o a ALGUIEN QUE LLEGA ("Llega alguien...").
 4. PROHIBIDO mencionar nombres de cartas.
 5. PROHIBIDO el relleno psicológico.
+6. Completa SIEMPRE todas las secciones, no dejes nada a medias.
 
-EJEMPLOS PERFECTOS DE TU ESTILO:
-- "Llega un hombre exitoso y estable a tu vida, alguien que te ofrece seguridad y compromiso."
-- "Eres una persona materialista que se vuelve más sensible y abierta emocionalmente."
-- "Viene alguien del pasado con intenciones renovadas, buscando reconciliación."
-- "Una mujer intuitiva y serena aparece en tu camino, trayendo claridad y paz."
-- "Eres alguien aferrado a lo suyo que se llena de ilusiones y busca validación."
-- "Llega un príncipe encantador, alguien con carisma que te conquista con facilidad."
+EJEMPLO PERFECTO (4 de Oros + 7 de Copas, luego Templanza + 10 de Copas):
+- Dupla 1: "Persona materialista que se vuelve más sensible."
+- Dupla 2: "Con tranquilidad y paciencia, logra la felicidad familiar y social."
+
+OTROS EJEMPLOS DE TU ESTILO:
+- "Llega un hombre exitoso y estable, alguien que ofrece seguridad y compromiso."
+- "Persona intuitiva que recibe claridad mental y corta con la confusión."
+- "Viene alguien del pasado con intenciones renovadas."
+- "Una mujer serena y generosa aparece en tu camino."
+- "Alguien aferrado a lo suyo que se llena de ilusiones."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones describiendo a la persona (tú o alguien que llega). Tono humano y cálido.]</p>
+    <p>[1-2 oraciones concretas describiendo a la persona. Sé directo.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones describiendo a la persona (tú o alguien que llega). Tono humano y cálido.]</p>
+    <p>[1-2 oraciones concretas describiendo la evolución. Sé directo.]</p>
 </div>`;
 
             userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Describe a la persona (puede ser el consultante o alguien que llega/regresa). NO menciones las cartas.`;
+Describe a la persona con palabras CONCRETAS y DIRECTAS. NO menciones las cartas. Completa todas las secciones.`;
 
         } else if (estilo === 'manual') {
             temp = 0.3;
-            systemPrompt = `Diccionario técnico de Tarot. Estilo humano y directo.
+            systemPrompt = `Diccionario técnico de Tarot. Estilo concreto y directo.
 
 EJEMPLOS PERFECTOS:
+- "Persona materialista que se vuelve más sensible."
 - "Llega un hombre exitoso y estable."
-- "Eres una persona materialista que se vuelve más sensible."
+- "Con tranquilidad, logra la felicidad familiar."
 - "Viene alguien del pasado con intenciones renovadas."
-- "Una mujer intuitiva y serena aparece en tu camino."
 
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado:</strong> [1-2 oraciones describiendo a la persona]</p>
-    <p><strong>Predicción:</strong> [1 oración con predicción simbólica válida]</p>
+    <p><strong>Significado:</strong> [1-2 oraciones concretas]</p>
+    <p><strong>Predicción:</strong> [1 oración]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado:</strong> [1-2 oraciones describiendo a la persona]</p>
-    <p><strong>Predicción:</strong> [1 oración con predicción simbólica válida]</p>
+    <p><strong>Significado:</strong> [1-2 oraciones concretas]</p>
+    <p><strong>Predicción:</strong> [1 oración]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo.`;
 
         } else {
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, humano. Anuncias quién llega o cómo evoluciona el consultante.`;
+                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto. Usas palabras directas como "materialista", "exitoso", "sensible".`;
             } else {
                 temp = 0.6;
-                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, profundo, humano. Describes a la persona y su proceso.`;
+                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Describes a la persona con palabras claras.`;
             }
 
             const reglasFormato = `
 REGLAS ABSOLUTAS:
-1. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA/REGRESA.
-2. Usa frases variadas: "Eres...", "Llega alguien...", "Viene un hombre/mujer...".
-3. Describe la PERSONA con calidez.
+1. Usa palabras CONCRETAS y DIRECTAS.
+2. NO uses frases abstractas.
+3. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA.
 4. PROHIBIDO mencionar nombres de cartas.
-5. PROHIBIDO el relleno psicológico.
+5. Completa SIEMPRE todas las secciones.
 
-EJEMPLOS PERFECTOS:
-- "Llega un hombre exitoso y estable a tu vida, alguien que te ofrece seguridad."
-- "Eres una persona materialista que se vuelve más sensible."
-- "Viene alguien del pasado con intenciones renovadas."
-- "Una mujer intuitiva y serena aparece en tu camino."
+EJEMPLO PERFECTO:
+- "Persona materialista que se vuelve más sensible."
+- "Con tranquilidad, logra la felicidad familiar."
+- "Llega un hombre exitoso y estable."
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones describiendo a la persona]</p>
+    <p>[1-2 oraciones concretas]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones describiendo a la persona]</p>
+    <p>[1-2 oraciones concretas]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
-    <p><span id="conclusion">[1-2 oraciones finales con tono humano]</span></p>
+    <p><span id="conclusion">[1-2 oraciones finales]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Describe a la persona.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo.`;
         }
 
-        // ==========================================
-        // LLAMADA A LA API DE GROQ
-        // ==========================================
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -600,7 +597,7 @@ FORMATO (3 secciones HTML):
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: temp,
-                max_tokens: 600
+                max_tokens: 1200 // ⬆️ SUBIDO de 600 a 1200 para evitar cortes
             })
         });
 
@@ -613,7 +610,7 @@ FORMATO (3 secciones HTML):
         let text = extraerRespuesta(raw);
 
         if (!text || text.length < 20) {
-            text = `<div class="reading-section"><h3>Conclusión</h3><p>Llega alguien importante a tu vida o tú mismo estás en proceso de transformación.</p></div>`;
+            text = `<div class="reading-section"><h3>Conclusión</h3><p>Persona en proceso de transformación que debe abrirse a nuevas posibilidades.</p></div>`;
         }
 
         return res.json({ lectura: text });
