@@ -482,7 +482,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
 // ==========================================
 
 // ==========================================
-// PROMPTS: INTERPRETACIÓN DE DUPLAS COMO UNIDAD
+// PROMPTS: DUPLAS COMO UNIDAD (SIN MENCIONAR CARTAS INDIVIDUALES)
 // ==========================================
 
 let systemPrompt = '';
@@ -492,60 +492,61 @@ let temp = 0.7;
 if (esModoGratis) {
     systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono directo y predictivo.
 
-CÓMO INTERPRETAR DUPLAS:
-- Interpreta las DOS cartas como UNA SOLA energía combinada
-- NO expliques cada carta por separado
-- Da el significado de la combinación en conjunto
+REGLA ABSOLUTA:
+- Interpreta la dupla como UNA SOLA ENERGÍA COMBINADA
+- PROHIBIDO mencionar las cartas individualmente (NO digas "el 4 de Oros significa..." o "la energía del 7 de Copas...")
+- Da DIRECTAMENTE el significado de la combinación
 
 EJEMPLOS CORRECTOS:
+- 4 de Oros + 7 de Copas = "Persona aferrada a lo suyo que se llena de ilusiones, o alguien materialista que se vuelve más sensible. Proteges tu estabilidad pero te pierdes en fantasías."
 - Templanza + Sota de Oros = "Un nuevo amor está por llegar con calma, o nuevos estudios avanzan con pasos firmes."
 - Diablo + 8 de Oros = "Persona que sale de los vicios y se aplica al trabajo con dedicación."
 
-REGLA DE ORO:
-- SÍ haz predicciones simbólicas válidas: "llega un nuevo amor", "avanzan nuevos estudios", "recibes una propuesta"
-- NO inventes datos falsos: nombres propios, porcentajes, empresas específicas
+EJEMPLO INCORRECTO (NO HAGAS ESTO):
+❌ "La energía del 4 de Oros te mantiene aferrado, mientras que el 7 de Copas abre ilusiones..."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
-    <h3>Dupla 1: Tu Presente (${a} + ${b})</h3>
-    <p>[Significado de la combinación en conjunto. 4-6 oraciones directas.]</p>
+    <h3>Dupla 1: Tu Presente</h3>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas individualmente.]</p>
 </div>
 <div class="reading-section">
-    <h3>Dupla 2: Tu Evolución Futura (${c} + ${d})</h3>
-    <p>[Significado de la combinación en conjunto. 4-6 oraciones directas.]</p>
+    <h3>Dupla 2: Tu Evolución Futura</h3>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas individualmente.]</p>
 </div>`;
 
     userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}.
-Interpreta cada dupla como una unidad. NO expliques cartas por separado. Haz predicciones simbólicas válidas.`;
+Da el significado DIRECTO de cada combinación. NO menciones las cartas individualmente. Haz predicciones simbólicas válidas.`;
 
 } else if (estilo === 'manual') {
     temp = 0.3;
     systemPrompt = `Diccionario técnico de Tarot.
 
-DUPLAS: Interpreta las dos cartas como UNA SOLA energía combinada.
-Ejemplo: Templanza+Sota de Oros = "Nuevos estudios o un nuevo amor llegan con calma y pasos firmes."
+REGLA ABSOLUTA:
+- Interpreta la dupla como UNA SOLA ENERGÍA
+- PROHIBIDO mencionar cartas individuales
+- Da el significado directo de la combinación
 
-SÍ: Interpretar la dupla como unidad, predicciones simbólicas válidas.
-NO: Explicar cartas por separado, inventar datos específicos.
+Ejemplo: 4 de Oros + 7 de Copas = "Persona aferrada a lo suyo que se llena de ilusiones, materialista que se vuelve más sensible."
 
 FORMATO:
 <div class="reading-section">
-    <h3>Dupla 1: ${a}+${b} (Presente)</h3>
-    <p><strong>Significado 1:</strong> [Interpretación conjunta de ambas cartas]</p>
+    <h3>Dupla 1: Presente</h3>
+    <p><strong>Significado 1:</strong> [Interpretación directa de la combinación]</p>
     <p><strong>Significado 2:</strong> [Otra perspectiva de la combinación]</p>
     <p><strong>Significado 3:</strong> [Predicción simbólica válida]</p>
 </div>
 <div class="reading-section">
-    <h3>Dupla 2: ${c}+${d} (Futuro)</h3>
-    <p><strong>Significado 1:</strong> [Interpretación conjunta de ambas cartas]</p>
+    <h3>Dupla 2: Futuro</h3>
+    <p><strong>Significado 1:</strong> [Interpretación directa de la combinación]</p>
     <p><strong>Significado 2:</strong> [Otra perspectiva de la combinación]</p>
     <p><strong>Significado 3:</strong> [Predicción simbólica válida]</p>
 </div>`;
 
     userPrompt = esPreguntaEspecifica 
-        ? `Pregunta: "${preguntaLimpia}". Interpreta ${a}+${b} y ${c}+${d} como unidades. NO expliques cartas por separado.`
-        : `Tema: ${tema}. Interpreta ${a}+${b} y ${c}+${d} como unidades. NO expliques cartas por separado.`;
+        ? `Pregunta: "${preguntaLimpia}". Da el significado directo de ${a}+${b} y ${c}+${d} como combinaciones. NO menciones cartas individuales.`
+        : `Tema: ${tema}. Da el significado directo de ${a}+${b} y ${c}+${d} como combinaciones. NO menciones cartas individuales.`;
 
 } else {
     let personalidad = '';
@@ -553,32 +554,33 @@ FORMATO:
     if (estilo === 'morgana' || estilo === 'magico') {
         temp = 0.8;
         personalidad = `Eres Morgana, vidente experta en Tarot. 
-        TU ESTILO: Directo, místico y predictivo. Anuncias eventos y energías que se avecinan. 
+        TU ESTILO: Directo, místico y predictivo. 
         VOCABULARIO: "El oráculo revela que llega...", "se avecina un nuevo amor o proyecto", "el destino te prepara para...". 
-        ENFOQUE: Predicciones simbólicas concretas.`;
+        ENFOQUE: Predicciones simbólicas concretas de la combinación.`;
     } else {
         temp = 0.6;
         personalidad = `Eres un terapeuta experto en Tarot Evolutivo. 
         TU ESTILO: Empático, reflexivo y profundo. 
-        VOCABULARIO: "Esta combinación te invita a prepararte para...", "tu interior se abre a recibir...", "proceso de evolución que trae...". 
-        ENFOQUE: Cómo el consultante evoluciona internamente para recibir nuevos amores, estudios o proyectos.`;
+        VOCABULARIO: "Esta combinación indica que...", "tu interior se abre a recibir...", "proceso de evolución que trae...". 
+        ENFOQUE: Cómo evoluciona el consultante según la energía combinada.`;
     }
 
     const reglasFormato = `
-REGLA DE ORO:
-- Interpreta cada dupla como UNA SOLA energía combinada
-- NO expliques cada carta por separado
-- SÍ haz predicciones simbólicas válidas: "llega un nuevo amor", "avanzan nuevos estudios"
-- NO inventes datos falsos: nombres, porcentajes, empresas
+REGLA ABSOLUTA:
+- Interpreta cada dupla como UNA SOLA ENERGÍA COMBINADA
+- PROHIBIDO mencionar las cartas individualmente (NO digas "el 4 de Oros..." o "la energía del 7 de Copas...")
+- Da DIRECTAMENTE el significado de la combinación
+- SÍ haz predicciones simbólicas válidas
+- NO inventes datos falsos
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
-    <h3>Dupla 1: Tu Presente (${a} + ${b})</h3>
-    <p>[Significado de la combinación en conjunto. 4-6 oraciones.]</p>
+    <h3>Dupla 1: Tu Presente</h3>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas.]</p>
 </div>
 <div class="reading-section">
-    <h3>Dupla 2: Tu Evolución Futura (${c} + ${d})</h3>
-    <p>[Significado de la combinación en conjunto. 4-6 oraciones.]</p>
+    <h3>Dupla 2: Tu Evolución Futura</h3>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones las cartas.]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
@@ -588,8 +590,8 @@ FORMATO (3 secciones HTML):
     systemPrompt = personalidad + reglasFormato;
     
     userPrompt = esPreguntaEspecifica 
-        ? `Pregunta: "${preguntaLimpia}". Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Interpreta cada dupla como unidad. NO expliques cartas por separado.`
-        : `Tema: ${tema}. Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Interpreta cada dupla como unidad. NO expliques cartas por separado.`;
+        ? `Pregunta: "${preguntaLimpia}". Da el significado directo de las combinaciones. NO menciones las cartas individualmente.`
+        : `Tema: ${tema}. Da el significado directo de las combinaciones. NO menciones las cartas individualmente.`;
 }
 // ==========================================
 // LLAMADA A LA API DE GROQ (NO TOCAR ESTO)
