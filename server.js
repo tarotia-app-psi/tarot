@@ -475,32 +475,23 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esModoGratis = modo === 'gratis';
 
         // ==========================================
-// PROMPTS OPTIMIZADOS (MENOS TOKENS, MISMA CALIDAD)
-// ==========================================
-// ==========================================
-// PROMPTS EQUILIBRADOS Y DIFERENCIADOS POR ESTILO
-// ==========================================
+        // PROMPTS: DUPLAS COMO UNIDAD
+        // ==========================================
+        let systemPrompt = '';
+        let userPrompt = '';
+        let temp = 0.7;
 
-// ==========================================
-// PROMPTS: DUPLAS COMO UNIDAD (Cartas enviadas, pero no mencionadas en la respuesta)
-// ==========================================
-
-let systemPrompt = '';
-let userPrompt = '';
-let temp = 0.7;
-
-if (esModoGratis) {
-    systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono directo y predictivo.
+        if (esModoGratis) {
+            systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono directo y predictivo.
 
 REGLA ABSOLUTA DE FORMATO:
 - Interpreta la dupla como UNA SOLA ENERGÍA COMBINADA.
-- PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta (NO digas "el 4 de Oros significa..." o "la energía del 7 de Copas...").
+- PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
 - Da DIRECTAMENTE el significado de la combinación.
 
 EJEMPLOS CORRECTOS DE RESPUESTA:
-- "Persona aferrada a lo suyo que se llena de ilusiones, o alguien materialista que se vuelve más sensible. Proteges tu estabilidad pero te pierdes en fantasías."
+- "Persona aferrada a lo suyo que se llena de ilusiones, o alguien materialista que se vuelve más sensible."
 - "Un nuevo amor está por llegar con calma, o nuevos estudios avanzan con pasos firmes."
-- "Sales de los vicios y te aplicas al trabajo con dedicación, dejando atrás la vagancia."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
@@ -512,20 +503,15 @@ FORMATO (2 secciones HTML):
     <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
 </div>`;
 
-    userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
+            userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Da el significado DIRECTO de estas combinaciones. NO menciones los nombres de las cartas en tu respuesta. Haz predicciones simbólicas válidas.`;
+Da el significado DIRECTO de estas combinaciones. NO menciones los nombres de las cartas en tu respuesta.`;
 
-} else if (estilo === 'manual') {
-    temp = 0.3;
-    systemPrompt = `Diccionario técnico de Tarot.
+        } else if (estilo === 'manual') {
+            temp = 0.3;
+            systemPrompt = `Diccionario técnico de Tarot.
 
-REGLA ABSOLUTA:
-- Interpreta la dupla como UNA SOLA ENERGÍA.
-- PROHIBIDO mencionar los nombres de las cartas individuales en la respuesta.
-- Da el significado directo de la combinación.
-
-Ejemplo de respuesta correcta: "Persona aferrada a lo suyo que se llena de ilusiones, materialista que se vuelve más sensible."
+REGLA ABSOLUTA: Interpreta la dupla como UNA SOLA ENERGÍA. PROHIBIDO mencionar nombres de cartas individuales.
 
 FORMATO:
 <div class="reading-section">
@@ -541,36 +527,47 @@ FORMATO:
     <p><strong>Significado 3:</strong> [Predicción simbólica válida]</p>
 </div>`;
 
-    userPrompt = esPreguntaEspecifica 
-        ? `Pregunta: "${preguntaLimpia}". Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`
-        : `Tema: ${tema}. Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`;
+            userPrompt = esPreguntaEspecifica 
+                ? `Pregunta: "${preguntaLimpia}". Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`
+                : `Tema: ${tema}. Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`;
 
-} else {
-    let personalidad = '';
-    
-    if (estilo === 'morgana' || estilo === 'magico') {
-        temp = 0.8;
-        personalidad = `Eres Morgana, vidente experta en Tarot. 
-        TU ESTILO: Directo, místico y predictivo. 
-        VOCABULARIO: "El oráculo revela que llega...", "se avecina un nuevo amor o proyecto", "el destino te prepara para...". 
-        ENFOQUE: Predicciones simbólicas concretas de la combinación.`;
-    } else {
-        temp = 0.6;
-        personalidad = `Eres un terapeuta experto en Tarot Evolutivo. 
-        TU ESTILO: Empático, reflexivo y profundo. 
-        VOCABULARIO: "Esta combinación indica que...", "tu interior se abre a recibir...", "proceso de evolución que trae...". 
-        ENFOQUE: Cómo evoluciona el consultante según la energía combinada.`;
-    }
+        } else {
+            let personalidad = '';
+            if (estilo === 'morgana' || estilo === 'magico') {
+                temp = 0.8;
+                personalidad = `Eres Morgana, vidente experta en Tarot. TU ESTILO: Directo, místico y predictivo. VOCABULARIO: "El oráculo revela que llega...", "se avecina un nuevo amor". ENFOQUE: Predicciones simbólicas concretas.`;
+            } else {
+                temp = 0.6;
+                personalidad = `Eres un terapeuta experto en Tarot Evolutivo. TU ESTILO: Empático, reflexivo y profundo. VOCABULARIO: "Esta combinación indica que...", "tu interior se abre a recibir...". ENFOQUE: Cómo evoluciona el consultante según la energía combinada.`;
+            }
 
-    const reglasFormato = `
-REGLA ABSOLUTA:
-- Interpreta cada dupla como UNA SOLA ENERGÍA COMBINADA.
-- PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
-- Da DIRECTAMENTE el significado de la combinación.
-- SÍ haz predicciones simbólicas válidas.
-// ==========================================
-// LLAMADA A LA API DE GROQ (NO TOCAR ESTO)
-// ==========================================
+            const reglasFormato = `
+REGLA ABSOLUTA: Interpreta cada dupla como UNA SOLA ENERGÍA COMBINADA. PROHIBIDO mencionar los nombres de las cartas individualmente en tu respuesta.
+
+FORMATO (3 secciones HTML):
+<div class="reading-section">
+    <h3>Dupla 1: Tu Presente</h3>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
+</div>
+<div class="reading-section">
+    <h3>Dupla 2: Tu Evolución Futura</h3>
+    <p>[Significado directo de la combinación. 4-6 oraciones. NO menciones los nombres de las cartas.]</p>
+</div>
+<div class="reading-section">
+    <h3>Conclusión</h3>
+    <p><span id="conclusion">[Síntesis final que conecte presente y futuro. 3-4 oraciones.]</span></p>
+</div>`;
+
+            systemPrompt = personalidad + reglasFormato;
+            
+            userPrompt = esPreguntaEspecifica 
+                ? `Pregunta: "${preguntaLimpia}". Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`
+                : `Tema: ${tema}. Las cartas son: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}). Da el significado directo. NO menciones los nombres de las cartas.`;
+        }
+
+        // ==========================================
+        // LLAMADA A LA API DE GROQ
+        // ==========================================
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -597,7 +594,7 @@ REGLA ABSOLUTA:
         let text = extraerRespuesta(raw);
 
         if (!text || text.length < 30) {
-            text = `<div class="reading-section"><h3>Conclusion</h3><p>La dupla ${a} y ${b} indica que la situacion actual requiere atencion y reflexion profunda.</p></div><div class="reading-section"><h3>Prediccion</h3><p>La dupla ${c} y ${d} revela un cambio significativo en el horizonte.</p></div>`;
+            text = `<div class="reading-section"><h3>Conclusion</h3><p>La combinación de cartas indica que la situación actual requiere atención y reflexión profunda para avanzar hacia un nuevo horizonte.</p></div>`;
         }
 
         return res.json({ lectura: text });
