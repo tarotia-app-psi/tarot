@@ -474,70 +474,94 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esPreguntaEspecifica = (tema === 'Pregunta Especifica' || tema === 'Pregunta Específica') && preguntaLimpia.length > 0;
         const esModoGratis = modo === 'gratis';
 
-        let systemPrompt = '';
-        let userPrompt = '';
-        let temp = 0.7;
+        // ==========================================
+// PROMPTS OPTIMIZADOS (MENOS TOKENS, MISMA CALIDAD)
+// ==========================================
 
-        if (esModoGratis) {
-            systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono mistico, directo y predictivo.
-Responde SOLO con 2 secciones HTML con class="reading-section".
-Cada seccion debe tener al menos 3 oraciones completas.
-NO saludes. NO uses asteriscos ni markdown.`;
-            userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
-Dupla 1 (Presente): ${a} y ${b}
-Dupla 2 (Futuro): ${c} y ${d}
-Responde en espanol. Seccion 1 = CONCLUSION sobre la pregunta. Seccion 2 = PREDICCION.`;
-        } else if (estilo === 'manual') {
-            temp = 0.3;
-            systemPrompt = `Actua como un diccionario tecnico, objetivo y neutral de Tarot.
-Tu tarea exclusiva es analizar las dos duplas de cartas que te presenta el usuario:
-- Dupla 1: ${a} y ${b}
-- Dupla 2: ${c} y ${d}
-Devuelve la respuesta estructurada ESTRICTAMENTE en formato HTML de la siguiente manera:
+let systemPrompt = '';
+let userPrompt = '';
+let temp = 0.7;
+
+if (esModoGratis) {
+    systemPrompt = `Eres Morgana, experta lectora de Tarot. Tono directo y predictivo.
+
+DUPLAS: Carta1=individuo, Carta2=energía que lo influye. Ejemplo: Emperador+Sol=hombre elegante+alegría=hombre feliz, amor que triunfa.
+
+Responde SOLO con 2 secciones HTML class="reading-section". Cada sección 4-6 oraciones. NO saludes, NO asteriscos, NO markdown. Sé específica y predictiva. Incluye variaciones si tiene/no tiene pareja.
+
+FORMATO:
 <div class="reading-section">
-    <h3>Dupla 1: ${a} + ${b}</h3>
-    <ul>
-        <li><strong>Significado 1:</strong> [Significado practico]</li>
-        <li><strong>Significado 2:</strong> [Significado practico]</li>
-        <li><strong>Significado 3:</strong> [Significado practico]</li>
-    </ul>
+    <h3>Tu Situación Actual</h3>
+    <p>[Interpretación Dupla 1: individuo+energía=resultado. 4-6 oraciones.]</p>
 </div>
 <div class="reading-section">
-    <h3>Dupla 2: ${c} + ${d}</h3>
-    <ul>
-        <li><strong>Significado 1:</strong> [Significado practico]</li>
-        <li><strong>Significado 2:</strong> [Significado practico]</li>
-        <li><strong>Significado 3:</strong> [Significado practico]</li>
-    </ul>
-</div>
-NO uses asteriscos ni markdown.`;
-            userPrompt = esPreguntaEspecifica ? `Pregunta especifica: "${preguntaLimpia}". Cartas: ${a}, ${b}, ${c} y ${d}.` : `Tema general: ${tema}. Cartas: ${a}, ${b}, ${c} y ${d}.`;
-        } else {
-            const personalidad = (estilo === 'morgana' || estilo === 'magico')
-                ? 'Eres Morgana, una experta y asertiva lectora de Tarot Rider-Waite. Tu tono es directo, mistico y predictivo.'
-                : 'Eres un terapeuta y experto lector de Tarot Evolutivo. Tu tono es empatico, reflexivo y psicologico.';
-            const reglasFormato = `
-NO uses listas, viñetas, guiones ni asteriscos (*).
-Devuelve la respuesta EXACTAMENTE en este formato HTML:
-<div class="reading-section">
-    <h3>El Presente y Origen (${a} + ${b})</h3>
-    <p>[Interpretacion estado actual]</p>
-</div>
-<div class="reading-section">
-    <h3>El Camino hacia el Futuro (${c} + ${d})</h3>
-    <p>[Interpretacion futuro a corto plazo]</p>
-</div>
-<div class="reading-section">
-    <h3>Predicciones del Oraculo</h3>
-    <p>[2 o 3 predicciones concretas en un solo parrafo]</p>
-</div>
-<div class="reading-section">
-    <h3>Consejo y Conclusion</h3>
-    <p><span id="conclusion">[Frase de cierre y consejo final]</span></p>
+    <h3>Hacia Dónde Evoluciona</h3>
+    <p>[Interpretación Dupla 2 conectada con Dupla 1. 4-6 oraciones.]</p>
 </div>`;
-            systemPrompt = personalidad + reglasFormato;
-            userPrompt = esPreguntaEspecifica ? `Pregunta especifica: "${preguntaLimpia}". Cartas: ${a}, ${b}, ${c} y ${d}.` : `Tema general: ${tema}. Cartas: ${a}, ${b}, ${c} y ${d}.`;
-        }
+
+    userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
+Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Interpreta como individuo+energía=resultado.`;
+
+} else if (estilo === 'manual') {
+    temp = 0.3;
+    systemPrompt = `Diccionario técnico de Tarot. DUPLAS: Carta1=individuo, Carta2=energía influyente. Ejemplo: Emperador+Sol=hombre elegante+alegría=hombre feliz.
+
+NO listas, NO asteriscos. HTML estricto. 3 interpretaciones por dupla.
+
+FORMATO:
+<div class="reading-section">
+    <h3>Dupla 1: ${a}+${b}</h3>
+    <p><strong>Interpretación 1:</strong> [Cómo ${b} modifica a ${a}]</p>
+    <p><strong>Interpretación 2:</strong> [Otra perspectiva]</p>
+    <p><strong>Interpretación 3:</strong> [Tercera perspectiva]</p>
+</div>
+<div class="reading-section">
+    <h3>Dupla 2: ${c}+${d}</h3>
+    <p><strong>Interpretación 1:</strong> [Cómo ${d} modifica a ${c}]</p>
+    <p><strong>Interpretación 2:</strong> [Otra perspectiva]</p>
+    <p><strong>Interpretación 3:</strong> [Tercera perspectiva]</p>
+</div>`;
+
+    userPrompt = esPreguntaEspecifica 
+        ? `Pregunta: "${preguntaLimpia}". Interpreta ${a}+${b} y ${c}+${d} como individuo+energía=resultado.`
+        : `Tema: ${tema}. Interpreta ${a}+${b} y ${c}+${d} como individuo+energía=resultado.`;
+
+} else {
+    temp = 0.75;
+    
+    const personalidad = (estilo === 'morgana' || estilo === 'magico')
+        ? `Eres Morgana, experta en Tarot. Tono directo, místico y predictivo. Lenguaje claro pero evocador.`
+        : `Eres terapeuta experto en Tarot Evolutivo. Tono empático y reflexivo. Lenguaje introspectivo.`;
+
+    const reglasFormato = `
+DUPLAS: Carta1=individuo, Carta2=energía influyente. Ejemplo: Emperador+Sol=hombre elegante+alegría=hombre feliz, amor que triunfa.
+
+NO listas, NO asteriscos. 4 secciones HTML exactas. Sé directo y predictivo.
+
+FORMATO:
+<div class="reading-section">
+    <h3>Tu Situación Actual (${a}+${b})</h3>
+    <p>[Cómo ${b} modifica a ${a}. 4-6 oraciones.]</p>
+</div>
+<div class="reading-section">
+    <h3>Hacia Dónde Evoluciona (${c}+${d})</h3>
+    <p>[Cómo ${d} modifica a ${c}, conectando con Dupla 1. 4-6 oraciones.]</p>
+</div>
+<div class="reading-section">
+    <h3>Predicciones del Oráculo</h3>
+    <p>[2-3 predicciones concretas. 4 oraciones.]</p>
+</div>
+<div class="reading-section">
+    <h3>Consejo y Conclusión</h3>
+    <p><span id="conclusion">[Consejo práctico. 3 oraciones.]</span></p>
+</div>`;
+
+    systemPrompt = personalidad + reglasFormato;
+    
+    userPrompt = esPreguntaEspecifica 
+        ? `Pregunta: "${preguntaLimpia}". Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Interpreta como individuo+energía=resultado.`
+        : `Tema: ${tema}. Dupla 1: ${a}+${b}, Dupla 2: ${c}+${d}. Interpreta como individuo+energía=resultado.`;
+}
 
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
