@@ -3,7 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-
+const rateLimit = require('express-rate-limit');
 const app = express();
 
 const corsOptions = {
@@ -114,7 +114,12 @@ function verificarAuth(req, res, next) {
         return res.status(403).json({ error: 'Token invalido o expirado.' });
     }
 }
-
+// 🛡️ Protección contra bots: máximo 15 tiradas por IP cada 15 minutos
+const tiradaLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 15, // Máximo 15 tiradas por IP cada 15 minutos
+    message: { error: 'Demasiadas solicitudes. Por favor, espera unos minutos antes de consultar de nuevo.' }
+});
 app.post('/api/auth/registrar', async (req, res) => {
     const { nombre, email } = req.body;
     if (!email || typeof email !== 'string' || !email.includes('@')) {
