@@ -487,7 +487,7 @@ REGLAS ABSOLUTAS:
 3. Las cartas pueden describir AL CONSULTANTE ("Eres...") o a ALGUIEN QUE LLEGA ("Llega alguien...").
 4. PROHIBIDO mencionar nombres de cartas.
 5. PROHIBIDO el relleno psicológico.
-6. Completa SIEMPRE todas las secciones, no dejes nada a medias.
+6. Completa SIEMPRE todas las secciones.
 
 EJEMPLO PERFECTO (4 de Oros + 7 de Copas, luego Templanza + 10 de Copas):
 - Dupla 1: "Persona materialista que se vuelve más sensible."
@@ -558,7 +558,7 @@ REGLAS ABSOLUTAS:
 4. PROHIBIDO mencionar nombres de cartas.
 5. Completa SIEMPRE todas las secciones.
 
-EJEMPLO PERFECTO:
+EJEMPLOS PERFECTOS:
 - "Persona materialista que se vuelve más sensible."
 - "Con tranquilidad, logra la felicidad familiar."
 - "Llega un hombre exitoso y estable."
@@ -566,22 +566,22 @@ EJEMPLO PERFECTO:
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones concretas]</p>
+    <p>[1-2 oraciones concretas describiendo a la persona]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones concretas]</p>
+    <p>[1-2 oraciones concretas describiendo la evolución]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
-    <p><span id="conclusion">[1-2 oraciones finales]</span></p>
+    <p><span id="conclusion">[SÍNTESIS CONCRETA de la persona y su camino. NO frases motivacionales abstractas. Ejemplo: "Persona exitosa que deberá enfrentar desafíos con entusiasmo."]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo. La conclusión debe describir a la PERSONA, no dar frases motivacionales.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y directo. La conclusión debe describir a la PERSONA, no dar frases motivacionales.`;
         }
 
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -597,7 +597,7 @@ FORMATO (3 secciones HTML):
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: temp,
-                max_tokens: 1200 // ⬆️ SUBIDO de 600 a 1200 para evitar cortes
+                max_tokens: 1400
             })
         });
 
