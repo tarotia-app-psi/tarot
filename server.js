@@ -597,7 +597,7 @@ FORMATO (3 secciones HTML):
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: temp,
-                max_tokens: 1800
+                max_tokens: 2400
             })
         });
 
