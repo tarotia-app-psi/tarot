@@ -457,7 +457,7 @@ mongoose.connection.once('open', async () => {
         console.error("❌ Error en diagnóstico:", error);
     }
 });
-app.post('/tirada', async (req, res) => {
+app.post('/tirada', tiradaLimiter, async (req, res) => {
     let { tema, a, b, c, d, estilo = 'filosofico', pregunta, cartas, modo } = req.body;
     if (!a && cartas && Array.isArray(cartas) && cartas.length >= 4) {
         a = cartas[0]; b = cartas[1]; c = cartas[2]; d = cartas[3];
