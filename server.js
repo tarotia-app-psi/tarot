@@ -475,7 +475,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esModoGratis = modo === 'gratis';
 
         // ==========================================
-        // NUEVO: DETECTAR EL ENFOQUE DEL TEMA
+        // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
         let enfoqueTema = "";
         const temaLower = (tema || "").toLowerCase();
@@ -493,27 +493,25 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         let temp = 0.7;
 
         if (esModoGratis) {
-            systemPrompt = `Eres experta lectora de Tarot. Estilo humano, cálido, directo y CONCRETO.
+            systemPrompt = `Eres experta lectora de Tarot. Estilo humano, cálido, directo, CONCRETO y HONESTO.
 ${enfoqueTema}
 
 REGLAS ABSOLUTAS:
-1. Usa palabras CONCRETAS y DIRECTAS (adinerado, materialista, sensible, exitoso, feliz, intuitivo).
-2. NO uses frases abstractas.
-3. Las cartas pueden describir AL CONSULTANTE ("Eres...") o a ALGUIEN QUE LLEGA ("Llega alguien...").
+1. Usa palabras CONCRETAS y DIRECTAS.
+2. NO uses frases abstractas ni relleno psicológico.
+3. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA.
 4. PROHIBIDO mencionar nombres de cartas.
-5. PROHIBIDO el relleno psicológico.
-6. Completa SIEMPRE todas las secciones.
-7. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA, no estado estático.**
+5. **Sé HONESTA: Si las cartas indican un futuro difícil, un bloqueo o una advertencia, DÍLO CON CLARIDAD.** NO fuerces un final feliz falso. El Tarot advierte para que el consultante pueda cambiar de rumbo.
+6. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA**, incluso si es una advertencia (ej: "deberás cambiar de estrategia", "tendrás que soltar", "enfrentarás un desafío").
 
 VERBOS CORRECTOS PARA DUPLA 2 (FUTURO):
-- "avanzará", "atravesará", "logrará", "enfrentará", "superará", "llegará", "alcanzará", "descubrirá", "recibirá"
+- Positivos: "avanzará", "logrará", "llegará", "construirá"
+- De Advertencia: "deberá enfrentar", "tendrá que soltar", "chocará con", "requerirá un cambio"
 
-VERBOS PROHIBIDOS PARA DUPLA 2:
-- ❌ "sigue sintiendo", "se mantiene", "continúa", "permanece"
-
-EJEMPLO PERFECTO (4 de Oros + 7 de Copas, luego Templanza + 10 de Copas):
-- Dupla 1: "Persona materialista que se vuelve más sensible."
-- Dupla 2: "Con tranquilidad y paciencia, logrará la felicidad familiar y social."
+EJEMPLOS DE ADVERTENCIA CONSTRUCTIVA:
+- "Se avecinan obstáculos que te exigirán cambiar de estrategia para no desgastarte."
+- "Es momento de soltar una situación tóxica antes de que te afecte más profundamente."
+- "Tus ilusiones actuales chocarán con la realidad; es mejor ajustar tus expectativas ahora."
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
@@ -522,49 +520,45 @@ FORMATO (2 secciones HTML):
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA, adaptadas al ${tema}. NO estados estáticos.]</p>
+    <p>[2-3 oraciones con verbos de acción futura o advertencia clara. NO fuerces un final feliz si las cartas no lo indican.]</p>
 </div>`;
 
             userPrompt = `Tema de consulta: ${tema}.
 Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Describe a la persona con palabras CONCRETAS adaptadas al tema de ${tema}. La Dupla 2 debe usar verbos de acción futura. NO menciones las cartas.`;
+Describe a la persona con palabras CONCRETAS. Sé honesta: si hay una advertencia, dila claramente para que pueda cambiar de rumbo. NO menciones los nombres de las cartas.`;
 
         } else if (estilo === 'manual') {
             temp = 0.4;
-            systemPrompt = `Diccionario técnico de Tarot. Estilo concreto y directo.
+            systemPrompt = `Diccionario técnico de Tarot. Estilo concreto, directo y HONESTO.
 ${enfoqueTema}
 
-EJEMPLOS PERFECTOS:
-- "Persona materialista que se vuelve más sensible."
-- "Llega un hombre exitoso y estable."
-- "Con tranquilidad, logrará la felicidad familiar."
-- "Persona que avanzará decidida y atravesará preocupaciones."
+REGLA CLAVE: Si las cartas son desafiantes, advierte con claridad. No suavices el mensaje.
 
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
     <p><strong>Significado:</strong> [2-3 oraciones concretas adaptadas al ${tema}]</p>
-    <p><strong>Predicción:</strong> [2 oraciones con verbo de acción futura]</p>
+    <p><strong>Advertencia/Predicción:</strong> [2 oraciones con verbo de acción futura o advertencia clara]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado:</strong> [2-3 oraciones con verbos de acción futura adaptadas al ${tema}]</p>
-    <p><strong>Predicción:</strong> [3 oraciones]</p>
+    <p><strong>Significado:</strong> [2-3 oraciones con verbos de acción futura o advertencia, adaptadas al ${tema}]</p>
+    <p><strong>Consejo de cambio:</strong> [Qué debe hacer el consultante para mejorar este futuro]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto, adapta al tema. Dupla 2 con verbos de acción futura.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto, adapta al tema. Dupla 2 con verbos de acción futura.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Incluye advertencias si las cartas lo indican.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Incluye advertencias si las cartas lo indican.`;
 
         } else {
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto. Usas palabras directas y verbos de acción futura.`;
+                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto y SIN FILTROS. Dices la verdad aunque sea dura, pero siempre con el fin de empoderar al consultante.`;
             } else {
                 temp = 0.6;
-                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Describes la evolución de la persona con verbos de acción.`;
+                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Ayudas al consultante a ver sus sombras y patrones destructivos para que pueda sanarlos.`;
             }
 
             const reglasFormato = `
@@ -572,12 +566,14 @@ ${enfoqueTema}
 
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
-2. NO uses frases abstractas.
+2. **Sé HONESTA: Si las cartas indican un futuro difícil, ADVIERTE con claridad.** NO fuerces un final feliz falso.
 3. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA.
 4. PROHIBIDO mencionar nombres de cartas.
-5. Completa SIEMPRE todas las secciones.
-6. **Dupla 2 debe usar verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará", "alcanzará".**
-7. **PROHIBIDO en Dupla 2: "sigue sintiendo", "se mantiene", "continúa", "permanece".**
+5. **Dupla 2 debe usar verbos de ACCIÓN o ADVERTENCIA: "deberá enfrentar", "tendrá que soltar", "chocará con", "requerirá un cambio".**
+
+EJEMPLOS DE ADVERTENCIA CONSTRUCTIVA:
+- "Se avecinan obstáculos que te exigirán cambiar de estrategia."
+- "Es momento de soltar una situación tóxica antes de que te desgaste."
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
@@ -586,18 +582,18 @@ FORMATO (3 secciones HTML):
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA, adaptadas al ${tema}]</p>
+    <p>[2-3 oraciones con verbos de acción o advertencia clara. Sé honesta sobre los desafíos.]</p>
 </div>
 <div class="reading-section">
-    <h3>Conclusión</h3>
-    <p><span id="conclusion">[SÍNTESIS CONCRETA de la persona y su evolución en el contexto de ${tema}. Ejemplo: "Persona exitosa que enfrentará desafíos laborales con entusiasmo."]</span></p>
+    <h3>Conclusión y Consejo</h3>
+    <p><span id="conclusion">[SÍNTESIS CONCRETA. Si el futuro es difícil, indica claramente qué debe cambiar el consultante para evitarlo. Ejemplo: "Para evitar este desgaste, es crucial que sueltes el control y ajustes tus expectativas ahora."]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Adapta la interpretación al tema de la pregunta. Dupla 2 con verbos de acción futura.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Adapta la interpretación al tema de ${tema}. Dupla 2 con verbos de acción futura.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Si hay una advertencia, dila claramente para que pueda cambiar de rumbo.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Si hay una advertencia, dila claramente para que pueda cambiar de rumbo.`;
         }
 
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -626,7 +622,7 @@ FORMATO (3 secciones HTML):
         let text = extraerRespuesta(raw);
 
         if (!text || text.length < 20) {
-            text = `<div class="reading-section"><h3>Conclusión</h3><p>Persona en proceso de transformación que avanzará hacia nuevas posibilidades.</p></div>`;
+            text = `<div class="reading-section"><h3>Conclusión</h3><p>Las cartas indican un momento de evaluación. Presta atención a las señales y no temas cambiar de rumbo si es necesario.</p></div>`;
         }
 
         return res.json({ lectura: text });
