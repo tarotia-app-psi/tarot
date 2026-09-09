@@ -611,7 +611,7 @@ FORMATO (4 secciones HTML):
                 ? `Tema: ${tema}. Pregunta: "${preguntaLimpia}". Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé CONCRETO y honesto. NO uses lenguaje abstracto.`
                 : `Tema: ${tema}. Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé CONCRETO y honesto. NO uses lenguaje abstracto.`;
 
-        } else {
+                } else {
             // ESTILOS MÁGICO Y FILOSÓFICO
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
@@ -630,27 +630,42 @@ REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
 2. **Sé HONESTA: Si las cartas indican un futuro difícil, ADVIERTE con claridad.**
 3. PROHIBIDO mencionar nombres de cartas.
-4. **Dupla 2 debe usar verbos de ACCIÓN o ADVERTENCIA: "deberá enfrentar", "tendrá que soltar", "chocará con".**
+4. **Dupla 2 debe describir a la PERSONA usando verbos DESCRIPTIVOS, no instructivos.**
+
+VERBOS CORRECTOS (DESCRIPTIVOS):
+- "es", "tiene", "se pone", "comienza", "llega", "enfrenta", "construye", "recibe"
+
+VERBOS PROHIBIDOS (INSTRUCTIVOS/MORALES):
+- ❌ "deberá", "debe", "tiene que", "no podrá permitir", "requiere esfuerzo constante"
+
+EJEMPLOS PERFECTOS (DESCRIPTIVOS):
+- "Persona con planes o visión, que se pone a trabajar con dedicación."
+- "Llega alguien exitoso que construirá algo sólido paso a paso."
+- "Persona decidida que enfrentará obstáculos con valentía."
+
+EJEMPLOS INCORRECTOS (INSTRUCTIVOS - NO HAGAS ESTO):
+❌ "Deberá planear con visión y trabajar con disciplina."
+❌ "No podrá permitir la complacencia, pues el progreso requiere esfuerzo constante."
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-4 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua.]</p>
+    <p>[1-2 oraciones describiendo a la PERSONA con verbos descriptivos. NO des instrucciones.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-4 oraciones con verbos de acción o advertencia clara. Sé honesta sobre los desafíos.]</p>
+    <p>[1-2 oraciones describiendo a la PERSONA con verbos de acción futura descriptivos: "se pondrá", "enfrentará", "construirá". NO uses "deberá" o "debe".]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión y Consejo</h3>
-    <p><span id="conclusion">[SÍNTESIS CONCRETA. Si el futuro es difícil, indica claramente qué debe cambiar el consultante para evitarlo.]</span></p>
+    <p><span id="conclusion">[1-2 oraciones describiendo el desenlace concreto. Si hay advertencia, dila como descripción, no como instrucción.]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Sé concreto y honesto.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Sé concreto y honesto.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Usa verbos DESCRIPTIVOS, no instructivos. Sé concreto y honesto.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Usa verbos DESCRIPTIVOS, no instructivos. Sé concreto y honesto.`;
         }
         // ==========================================
         // LLAMADA A LA API
