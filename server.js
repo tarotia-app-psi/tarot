@@ -477,20 +477,20 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
          // ==========================================
         // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
-             // ==========================================
+              // ==========================================
         // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
         let enfoqueTema = "";
         const temaLower = (tema || "").toLowerCase();
         
         if (temaLower.includes('pareja actual') || temaLower.includes('situacion') || temaLower.includes('relacion actual') || temaLower.includes('mi pareja')) {
-            enfoqueTema = "ENFOQUE OBLIGATORIO (PAREJA ACTUAL): Interpreta las cartas específicamente sobre la dinámica de la relación existente. Habla de comunicación, resolución de conflictos, lealtad, proyectos en común y la evolución de este vínculo. Asume que el consultante YA tiene pareja o está en una situación definida.";
+            enfoqueTema = "ENFOQUE OBLIGATORIO (PAREJA ACTUAL): Interpreta las cartas específicamente sobre la dinámica de la relación existente. Habla de comunicación, resolución de conflictos, lealtad, proyectos en común y la evolución de este vínculo.";
         } 
         else if (temaLower.includes('nueva pareja') || temaLower.includes('conseguir') || temaLower.includes('soltero') || temaLower.includes('llegada') || temaLower.includes('posibilidad')) {
-            enfoqueTema = "ENFOQUE OBLIGATORIO (NUEVA PAREJA): Interpreta las cartas sobre la posibilidad de un nuevo amor. Habla de sanar el pasado, preparación personal, señales de que alguien llega, y el tipo de energía o persona que se atraerá. Asume que el consultante está buscando o abriéndose a un nuevo vínculo.";
+            enfoqueTema = "ENFOQUE OBLIGATORIO (NUEVA PAREJA): Interpreta las cartas sobre la posibilidad de un nuevo amor. Habla de sanar el pasado, preparación personal, señales de que alguien llega y el tipo de energía que se atraerá.";
         } 
         else if (temaLower.includes('amor') || temaLower.includes('relacion') || temaLower.includes('sentimiento')) {
-            enfoqueTema = "ENFOQUE OBLIGATORIO (AMOR GENERAL): Interpreta las cartas en un contexto amoroso amplio. Adapta el mensaje para que sea útil tanto si el consultante tiene pareja como si está soltero.";
+            enfoqueTema = "ENFOQUE OBLIGATORIO (AMOR GENERAL): Interpreta las cartas en un contexto amoroso amplio, útil tanto si tiene pareja como si está soltero.";
         } 
         else if (temaLower.includes('negocio') || temaLower.includes('dinero') || temaLower.includes('trabajo') || temaLower.includes('finanzas') || temaLower.includes('carrera')) {
             enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas específicamente en el contexto de TRABAJO, negocios, finanzas, proyectos y éxito material.";
@@ -504,63 +504,63 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         let temp = 0.7;
 
         // ==========================================
-        // REGLA DE FUSIÓN DE DUPLAS (COMÚN A TODOS)
+        // REGLA DE FUSIÓN DE DUPLAS (APLICA A AMBAS)
         // ==========================================
-        const reglaFusion = `
-REGLA DE FUSIÓN DE DUPLA 1 (OBLIGATORIA): 
-La Carta 1 representa a la PERSONA o estado base. La Carta 2 representa lo que la INFLUYE o modifica. 
-DEBES FUSIONAR ambos conceptos en una sola frase descriptiva continua. NO los leas por separado.
+        const reglaFusionDuplas = `
+REGLA DE FUSIÓN DE DUPLAS (OBLIGATORIA PARA AMBAS DUPLAS): 
+En CADA dupla, la primera carta representa a la PERSONA o estado base, y la segunda carta representa lo que la INFLUYE o modifica. 
+DEBES FUSIONAR ambos conceptos en una sola frase descriptiva continua. NO leas las cartas por separado.
 EJEMPLO PERFECTO: 2 de Espadas + 7 de Copas = "Persona bloqueada que se pone a soñar o se llena de ilusiones."`;
 
         if (esModoGratis) {
             systemPrompt = `Eres experta lectora de Tarot. Estilo humano, cálido, directo, CONCRETO y HONESTO.
 ${enfoqueTema}
-${reglaFusion}
+${reglaFusionDuplas}
 
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
 2. NO uses frases abstractas ni relleno psicológico.
 3. PROHIBIDO mencionar los nombres de las cartas en el texto.
 4. **Sé HONESTA: Si las cartas indican un futuro difícil, DÍLO CON CLARIDAD.** No fuerces un final feliz.
-5. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA** (ej: "deberás cambiar", "tendrás que soltar", "enfrentarás").
+5. **Ambas duplas deben describir a la PERSONA.** La Dupla 2 debe usar verbos de acción futura descriptivos (ej: "se pondrá", "enfrentará", "construirá").
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-3 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua. Sé directo.]</p>
+    <p>[2-3 oraciones fusionando Carta 1 (Persona) + Carta 2 (Influencia) en una descripción continua.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-4 oraciones con verbos de acción futura o advertencia clara. NO estados estáticos.]</p>
+    <p>[2-3 oraciones fusionando Carta 3 (Persona futura) + Carta 4 (Influencia futura) con verbos de acción descriptivos.]</p>
 </div>`;
 
             userPrompt = `Tema: ${tema}. Pregunta: "${preguntaLimpia || 'Consulta general'}". 
 Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Aplica la REGLA DE FUSIÓN para la Dupla 1. Sé concreta y honesta. NO menciones los nombres de las cartas.`;
+Aplica la REGLA DE FUSIÓN en AMBAS duplas. Sé concreta y honesta. NO menciones los nombres de las cartas.`;
 
         } else if (estilo === 'manual') {
             temp = 0.4;
             systemPrompt = `Diccionario técnico de Tarot. Estilo concreto, directo y HONESTO.
 ${enfoqueTema}
-${reglaFusion}
+${reglaFusionDuplas}
 
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado Fusionado:</strong> [2-4 oraciones fusionando Persona + Influencia]</p>
-    <p><strong>Advertencia/Predicción:</strong> [2-4 oraciones con verbo de acción futura]</p>
+    <p><strong>Significado Fusionado:</strong> [2-3 oraciones fusionando Carta 1 + Carta 2]</p>
+    <p><strong>Advertencia/Predicción:</strong> [1-2 oraciones con verbo de acción futura]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado Fusionado:</strong> [2-4 oraciones fusionando Persona + Influencia futura]</p>
+    <p><strong>Significado Fusionado:</strong> [2-3 oraciones fusionando Carta 3 + Carta 4]</p>
     <p><strong>Consejo de cambio:</strong> [Qué debe hacer el consultante para mejorar este futuro]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN. Sé concreto y honesto.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN. Sé concreto y honesto.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: Dupla 1 (${a}+${b}), Dupla 2 (${c}+${d}). Aplica la REGLA DE FUSIÓN en AMBAS duplas. Sé concreto y honesto.`
+                : `Tema: ${tema}. Cartas: Dupla 1 (${a}+${b}), Dupla 2 (${c}+${d}). Aplica la REGLA DE FUSIÓN en AMBAS duplas. Sé concreto y honesto.`;
 
-                } else if (estilo === 'secuencial' || estilo === 'carta_por_carta') {
+        } else if (estilo === 'secuencial' || estilo === 'carta_por_carta') {
             temp = 0.7;
             systemPrompt = `Eres experta lectora de Tarot. Estilo: Narrativo, CONCRETO, directo y HONESTO.
 ${enfoqueTema}
@@ -576,42 +576,32 @@ ESTRUCTURA OBLIGATORIA DE 4 PASOS:
 REGLAS DE REDACCIÓN (CRÍTICAS):
 - Usa palabras CONCRETAS y DIRECTAS: "exitoso", "sensible", "bloqueado", "decidido", "tranquilo", "ilusionado".
 - PROHIBIDO lenguaje abstracto como "renovación", "claridad", "equilibrio interno", "energía positiva".
-- PROHIBIDO relleno psicológico como "deberás equilibrar", "evitando reaccionar impulsivamente".
 - Sé HONESTA: Si la Carta 4 indica un resultado difícil, ADVIERTE con claridad.
 - PROHIBIDO mencionar los nombres de las cartas en el texto.
-
-EJEMPLOS PERFECTOS DE TU ESTILO:
-- Carta 1: "Persona con buena estrella y sentimientos profundos."
-- Carta 2: "Influenciada por una energía de tranquilidad y sanación emocional."
-- Carta 3: "Se abrirá a recibir un nuevo vínculo con paciencia y autenticidad."
-- Carta 4: "Llegará una pareja estable y conectada emocionalmente."
-
-EJEMPLO INCORRECTO (NO HAGAS ESTO):
-❌ "Estás en un momento de renovación y claridad. Sientes una energía positiva..."
 
 FORMATO (4 secciones HTML):
 <div class="reading-section">
     <h3>1. Tu Estado Actual</h3>
-    <p>[2-4 oraciones describiendo a la PERSONA con palabras concretas, adaptadas al ${tema}.]</p>
+    <p>[2 oraciones describiendo a la PERSONA con palabras concretas, adaptadas al ${tema}.]</p>
 </div>
 <div class="reading-section">
     <h3>2. La Influencia</h3>
-    <p>[2-4 oraciones concretas sobre qué o quién está afectando a esta persona.]</p>
+    <p>[2 oraciones concretas sobre qué o quién está afectando a esta persona.]</p>
 </div>
 <div class="reading-section">
     <h3>3. Actitud en el Futuro Próximo</h3>
-    <p>[2-4 oraciones con verbos de acción futura concreta: "tomará", "enfrentará", "cambiará", "recibirá".]</p>
+    <p>[2 oraciones con verbos de acción futura concreta: "tomará", "enfrentará", "cambiará", "recibirá".]</p>
 </div>
 <div class="reading-section">
     <h3>4. Resultado Final y Consejo</h3>
-    <p><span id="conclusion">[2-4 oraciones sobre el desenlace concreto. Si es negativo, indica qué debe cambiar.]</span></p>
+    <p><span id="conclusion">[2 oraciones sobre el desenlace concreto. Si es negativo, indica qué debe cambiar.]</span></p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Tema: ${tema}. Pregunta: "${preguntaLimpia}". Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé CONCRETO y honesto. NO uses lenguaje abstracto.`
-                : `Tema: ${tema}. Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé CONCRETO y honesto. NO uses lenguaje abstracto.`;
+                ? `Tema: ${tema}. Pregunta: "${preguntaLimpia}". Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé CONCRETO y honesto.`
+                : `Tema: ${tema}. Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé CONCRETO y honesto.`;
 
-                } else {
+        } else {
             // ESTILOS MÁGICO Y FILOSÓFICO
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
@@ -624,13 +614,13 @@ FORMATO (4 secciones HTML):
 
             const reglasFormato = `
 ${enfoqueTema}
-${reglaFusion}
+${reglaFusionDuplas}
 
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
 2. **Sé HONESTA: Si las cartas indican un futuro difícil, ADVIERTE con claridad.**
 3. PROHIBIDO mencionar nombres de cartas.
-4. **Dupla 2 debe describir a la PERSONA usando verbos DESCRIPTIVOS, no instructivos.**
+4. **Ambas duplas deben describir a la PERSONA usando verbos DESCRIPTIVOS, no instructivos.**
 
 VERBOS CORRECTOS (DESCRIPTIVOS):
 - "es", "tiene", "se pone", "comienza", "llega", "enfrenta", "construye", "recibe"
@@ -639,33 +629,31 @@ VERBOS PROHIBIDOS (INSTRUCTIVOS/MORALES):
 - ❌ "deberá", "debe", "tiene que", "no podrá permitir", "requiere esfuerzo constante"
 
 EJEMPLOS PERFECTOS (DESCRIPTIVOS):
-- "Persona con planes o visión, que se pone a trabajar con dedicación."
-- "Llega alguien exitoso que construirá algo sólido paso a paso."
-- "Persona decidida que enfrentará obstáculos con valentía."
+- Dupla 1: "Persona con planes o visión, que se pone a trabajar con dedicación."
+- Dupla 2: "Llega alguien exitoso que construirá algo sólido paso a paso."
 
 EJEMPLOS INCORRECTOS (INSTRUCTIVOS - NO HAGAS ESTO):
 ❌ "Deberá planear con visión y trabajar con disciplina."
-❌ "No podrá permitir la complacencia, pues el progreso requiere esfuerzo constante."
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-3 oraciones describiendo a la PERSONA con verbos descriptivos. NO des instrucciones.]</p>
+    <p>[2-3 oraciones fusionando Carta 1 (Persona) + Carta 2 (Influencia) con verbos descriptivos.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones describiendo a la PERSONA con verbos de acción futura descriptivos: "se pondrá", "enfrentará", "construirá". NO uses "deberá" o "debe".]</p>
+    <p>[2-3 oraciones fusionando Carta 3 (Persona futura) + Carta 4 (Influencia futura) con verbos de acción descriptivos: "se pondrá", "enfrentará", "construirá".]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión y Consejo</h3>
-    <p><span id="conclusion">[1-3 oraciones describiendo el desenlace concreto. Si hay advertencia, dila como descripción, no como instrucción.]</span></p>
+    <p><span id="conclusion">[1-3 oraciones describiendo el desenlace concreto de ambas duplas.]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Usa verbos DESCRIPTIVOS, no instructivos. Sé concreto y honesto.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Usa verbos DESCRIPTIVOS, no instructivos. Sé concreto y honesto.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: Dupla 1 (${a}+${b}), Dupla 2 (${c}+${d}). Aplica la REGLA DE FUSIÓN en AMBAS duplas. Usa verbos DESCRIPTIVOS, no instructivos. Sé concreto y honesto.`
+                : `Tema: ${tema}. Cartas: Dupla 1 (${a}+${b}), Dupla 2 (${c}+${d}). Aplica la REGLA DE FUSIÓN en AMBAS duplas. Usa verbos DESCRIPTIVOS, no instructivos. Sé concreto y honesto.`;
         }
         // ==========================================
         // LLAMADA A LA API
