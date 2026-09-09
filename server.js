@@ -527,11 +527,11 @@ REGLAS ABSOLUTAS:
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua. Sé directo.]</p>
+    <p>[2-3 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua. Sé directo.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones con verbos de acción futura o advertencia clara. NO estados estáticos.]</p>
+    <p>[2-4 oraciones con verbos de acción futura o advertencia clara. NO estados estáticos.]</p>
 </div>`;
 
             userPrompt = `Tema: ${tema}. Pregunta: "${preguntaLimpia || 'Consulta general'}". 
@@ -547,12 +547,12 @@ ${reglaFusion}
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado Fusionado:</strong> [1-2 oraciones fusionando Persona + Influencia]</p>
-    <p><strong>Advertencia/Predicción:</strong> [1-2 oraciones con verbo de acción futura]</p>
+    <p><strong>Significado Fusionado:</strong> [2-4 oraciones fusionando Persona + Influencia]</p>
+    <p><strong>Advertencia/Predicción:</strong> [2-4 oraciones con verbo de acción futura]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado Fusionado:</strong> [1-2 oraciones fusionando Persona + Influencia futura]</p>
+    <p><strong>Significado Fusionado:</strong> [2-4 oraciones fusionando Persona + Influencia futura]</p>
     <p><strong>Consejo de cambio:</strong> [Qué debe hacer el consultante para mejorar este futuro]</p>
 </div>`;
 
@@ -624,11 +624,11 @@ REGLAS ABSOLUTAS:
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua.]</p>
+    <p>[2-4 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones con verbos de acción o advertencia clara. Sé honesta sobre los desafíos.]</p>
+    <p>[2-4 oraciones con verbos de acción o advertencia clara. Sé honesta sobre los desafíos.]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión y Consejo</h3>
