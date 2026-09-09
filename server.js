@@ -592,19 +592,19 @@ EJEMPLO INCORRECTO (NO HAGAS ESTO):
 FORMATO (4 secciones HTML):
 <div class="reading-section">
     <h3>1. Tu Estado Actual</h3>
-    <p>[1-2 oraciones describiendo a la PERSONA con palabras concretas, adaptadas al ${tema}.]</p>
+    <p>[2-4 oraciones describiendo a la PERSONA con palabras concretas, adaptadas al ${tema}.]</p>
 </div>
 <div class="reading-section">
     <h3>2. La Influencia</h3>
-    <p>[1-2 oraciones concretas sobre qué o quién está afectando a esta persona.]</p>
+    <p>[2-4 oraciones concretas sobre qué o quién está afectando a esta persona.]</p>
 </div>
 <div class="reading-section">
     <h3>3. Actitud en el Futuro Próximo</h3>
-    <p>[1-2 oraciones con verbos de acción futura concreta: "tomará", "enfrentará", "cambiará", "recibirá".]</p>
+    <p>[2-4 oraciones con verbos de acción futura concreta: "tomará", "enfrentará", "cambiará", "recibirá".]</p>
 </div>
 <div class="reading-section">
     <h3>4. Resultado Final y Consejo</h3>
-    <p><span id="conclusion">[1-2 oraciones sobre el desenlace concreto. Si es negativo, indica qué debe cambiar.]</span></p>
+    <p><span id="conclusion">[2-4 oraciones sobre el desenlace concreto. Si es negativo, indica qué debe cambiar.]</span></p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
@@ -650,15 +650,15 @@ EJEMPLOS INCORRECTOS (INSTRUCTIVOS - NO HAGAS ESTO):
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones describiendo a la PERSONA con verbos descriptivos. NO des instrucciones.]</p>
+    <p>[1-3 oraciones describiendo a la PERSONA con verbos descriptivos. NO des instrucciones.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones describiendo a la PERSONA con verbos de acción futura descriptivos: "se pondrá", "enfrentará", "construirá". NO uses "deberá" o "debe".]</p>
+    <p>[1-3 oraciones describiendo a la PERSONA con verbos de acción futura descriptivos: "se pondrá", "enfrentará", "construirá". NO uses "deberá" o "debe".]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión y Consejo</h3>
-    <p><span id="conclusion">[1-2 oraciones describiendo el desenlace concreto. Si hay advertencia, dila como descripción, no como instrucción.]</span></p>
+    <p><span id="conclusion">[1-3 oraciones describiendo el desenlace concreto. Si hay advertencia, dila como descripción, no como instrucción.]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
