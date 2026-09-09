@@ -478,7 +478,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
                // ==========================================
-        // DETECTAR EL ENFOQUE DEL TEMA (MEJORADO)
+        // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
         let enfoqueTema = "";
         const temaLower = (tema || "").toLowerCase();
@@ -490,7 +490,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
             enfoqueTema = "ENFOQUE OBLIGATORIO (NUEVA PAREJA): Interpreta las cartas sobre la posibilidad de un nuevo amor. Habla de sanar el pasado, preparación personal, señales de que alguien llega, y el tipo de energía o persona que se atraerá. Asume que el consultante está buscando o abriéndose a un nuevo vínculo.";
         } 
         else if (temaLower.includes('amor') || temaLower.includes('relacion') || temaLower.includes('sentimiento')) {
-            enfoqueTema = "ENFOQUE OBLIGATORIO (AMOR GENERAL): Interpreta las cartas en un contexto amoroso amplio. Adapta el mensaje para que sea útil y aplicable tanto si el consultante tiene pareja como si está soltero, enfocándote en la energía emocional del momento.";
+            enfoqueTema = "ENFOQUE OBLIGATORIO (AMOR GENERAL): Interpreta las cartas en un contexto amoroso amplio. Adapta el mensaje para que sea útil tanto si el consultante tiene pareja como si está soltero.";
         } 
         else if (temaLower.includes('negocio') || temaLower.includes('dinero') || temaLower.includes('trabajo') || temaLower.includes('finanzas') || temaLower.includes('carrera')) {
             enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas específicamente en el contexto de TRABAJO, negocios, finanzas, proyectos y éxito material.";
@@ -503,86 +503,80 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         let userPrompt = '';
         let temp = 0.7;
 
+        // ==========================================
+        // REGLA DE FUSIÓN DE DUPLAS (COMÚN A TODOS)
+        // ==========================================
+        const reglaFusion = `
+REGLA DE FUSIÓN DE DUPLA 1 (OBLIGATORIA): 
+La Carta 1 representa a la PERSONA o estado base. La Carta 2 representa lo que la INFLUYE o modifica. 
+DEBES FUSIONAR ambos conceptos en una sola frase descriptiva continua. NO los leas por separado.
+EJEMPLO PERFECTO: 2 de Espadas + 7 de Copas = "Persona bloqueada que se pone a soñar o se llena de ilusiones."`;
+
         if (esModoGratis) {
             systemPrompt = `Eres experta lectora de Tarot. Estilo humano, cálido, directo, CONCRETO y HONESTO.
 ${enfoqueTema}
+${reglaFusion}
 
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
 2. NO uses frases abstractas ni relleno psicológico.
-3. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA.
-4. PROHIBIDO mencionar nombres de cartas.
-5. **Sé HONESTA: Si las cartas indican un futuro difícil, un bloqueo o una advertencia, DÍLO CON CLARIDAD.** NO fuerces un final feliz falso. El Tarot advierte para que el consultante pueda cambiar de rumbo.
-6. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA**, incluso si es una advertencia (ej: "deberás cambiar de estrategia", "tendrás que soltar", "enfrentarás un desafío").
-
-VERBOS CORRECTOS PARA DUPLA 2 (FUTURO):
-- Positivos: "avanzará", "logrará", "llegará", "construirá"
-- De Advertencia: "deberá enfrentar", "tendrá que soltar", "chocará con", "requerirá un cambio"
-
-EJEMPLOS DE ADVERTENCIA CONSTRUCTIVA:
-- "Se avecinan obstáculos que te exigirán cambiar de estrategia para no desgastarte."
-- "Es momento de soltar una situación tóxica antes de que te afecte más profundamente."
-- "Tus ilusiones actuales chocarán con la realidad; es mejor ajustar tus expectativas ahora."
+3. PROHIBIDO mencionar los nombres de las cartas en el texto.
+4. **Sé HONESTA: Si las cartas indican un futuro difícil, DÍLO CON CLARIDAD.** No fuerces un final feliz.
+5. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA** (ej: "deberás cambiar", "tendrás que soltar", "enfrentarás").
 
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-3 oraciones concretas describiendo a la persona, adaptadas al ${tema}. Sé directo.]</p>
+    <p>[1-2 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua. Sé directo.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones con verbos de acción futura o advertencia clara. NO fuerces un final feliz si las cartas no lo indican.]</p>
+    <p>[1-2 oraciones con verbos de acción futura o advertencia clara. NO estados estáticos.]</p>
 </div>`;
 
-            userPrompt = `Tema de consulta: ${tema}.
-Pregunta: "${preguntaLimpia || 'Consulta general'}"
+            userPrompt = `Tema: ${tema}. Pregunta: "${preguntaLimpia || 'Consulta general'}". 
 Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Describe a la persona con palabras CONCRETAS. Sé honesta: si hay una advertencia, dila claramente para que pueda cambiar de rumbo. NO menciones los nombres de las cartas.`;
+Aplica la REGLA DE FUSIÓN para la Dupla 1. Sé concreta y honesta. NO menciones los nombres de las cartas.`;
 
         } else if (estilo === 'manual') {
             temp = 0.4;
             systemPrompt = `Diccionario técnico de Tarot. Estilo concreto, directo y HONESTO.
 ${enfoqueTema}
-
-REGLA CLAVE: Si las cartas son desafiantes, advierte con claridad. No suavices el mensaje.
+${reglaFusion}
 
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado:</strong> [2-3 oraciones concretas adaptadas al ${tema}]</p>
-    <p><strong>Advertencia/Predicción:</strong> [2 oraciones con verbo de acción futura o advertencia clara]</p>
+    <p><strong>Significado Fusionado:</strong> [1-2 oraciones fusionando Persona + Influencia]</p>
+    <p><strong>Advertencia/Predicción:</strong> [1-2 oraciones con verbo de acción futura]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado:</strong> [2-3 oraciones con verbos de acción futura o advertencia, adaptadas al ${tema}]</p>
+    <p><strong>Significado Fusionado:</strong> [1-2 oraciones fusionando Persona + Influencia futura]</p>
     <p><strong>Consejo de cambio:</strong> [Qué debe hacer el consultante para mejorar este futuro]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Incluye advertencias si las cartas lo indican.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Incluye advertencias si las cartas lo indican.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN. Sé concreto y honesto.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN. Sé concreto y honesto.`;
 
         } else if (estilo === 'secuencial' || estilo === 'carta_por_carta') {
-            // ==========================================
-            // NUEVO ESTILO: SECUENCIAL (4 PASOS)
-            // ==========================================
             temp = 0.7;
             systemPrompt = `Eres experta lectora de Tarot. Estilo: Narrativo, claro, paso a paso y HONESTO.
 ${enfoqueTema}
 
-REGLA ABSOLUTA: NO leas por duplas. Interpreta CADA CARTA en su posición específica según la estructura de 4 pasos.
+REGLA ABSOLUTA: NO leas por duplas fusionadas aquí. Interpreta CADA CARTA en su posición específica de 4 pasos.
 
 ESTRUCTURA OBLIGATORIA DE 4 PASOS:
 1. Carta 1 = Estado Actual (La energía base o situación presente).
 2. Carta 2 = La Influencia (Lo que afecta, presiona o motiva esa situación).
-3. Carta 3 = Actitud Futura (La acción, enfoque o desafío que se avecina en el corto plazo).
+3. Carta 3 = Actitud Futura (La acción, enfoque o desafío que se avecina).
 4. Carta 4 = Resultado Final (Cómo desembocará todo si se mantiene la energía actual).
 
 REGLAS DE REDACCIÓN:
 - Usa palabras CONCRETAS y DIRECTAS. NO relleno psicológico.
-- Sé HONESTA: Si la Carta 4 indica un resultado difícil, ADVIERTE con claridad y da un consejo para cambiar el rumbo.
+- Sé HONESTA: Si la Carta 4 indica un resultado difícil, ADVIERTE con claridad.
 - PROHIBIDO mencionar los nombres de las cartas en el texto.
-- PROHIBIDO fusionar las cartas como "duplas".
 
 FORMATO (4 secciones HTML):
 <div class="reading-section">
@@ -599,7 +593,7 @@ FORMATO (4 secciones HTML):
 </div>
 <div class="reading-section">
     <h3>4. Resultado Final y Consejo</h3>
-    <p><span id="conclusion">[2-3 oraciones sobre el desenlace. Si es negativo, indica claramente qué debe cambiar el consultante para evitarlo.]</span></p>
+    <p><span id="conclusion">[2-3 oraciones sobre el desenlace. Si es negativo, indica claramente qué debe cambiar el consultante.]</span></p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
@@ -607,53 +601,46 @@ FORMATO (4 secciones HTML):
                 : `Tema: ${tema}. Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé concreto y honesto.`;
 
         } else {
-            // ==========================================
-            // ESTILOS MÁGICO Y FILOSÓFICO (POR DUPLAS)
-            // ==========================================
+            // ESTILOS MÁGICO Y FILOSÓFICO
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto y SIN FILTROS. Dices la verdad aunque sea dura, pero siempre con el fin de empoderar al consultante.`;
+                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto y SIN FILTROS. Dices la verdad aunque sea dura, para empoderar al consultante.`;
             } else {
                 temp = 0.6;
-                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Ayudas al consultante a ver sus sombras y patrones destructivos para que pueda sanarlos.`;
+                personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Ayudas al consultante a ver sus sombras y patrones para sanarlos.`;
             }
 
             const reglasFormato = `
 ${enfoqueTema}
+${reglaFusion}
 
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
-2. **Sé HONESTA: Si las cartas indican un futuro difícil, ADVIERTE con claridad.** NO fuerces un final feliz falso.
-3. Las cartas pueden describir AL CONSULTANTE o a ALGUIEN QUE LLEGA.
-4. PROHIBIDO mencionar nombres de cartas.
-5. **Dupla 2 debe usar verbos de ACCIÓN o ADVERTENCIA: "deberá enfrentar", "tendrá que soltar", "chocará con", "requerirá un cambio".**
-
-EJEMPLOS DE ADVERTENCIA CONSTRUCTIVA:
-- "Se avecinan obstáculos que te exigirán cambiar de estrategia."
-- "Es momento de soltar una situación tóxica antes de que te desgaste."
+2. **Sé HONESTA: Si las cartas indican un futuro difícil, ADVIERTE con claridad.**
+3. PROHIBIDO mencionar nombres de cartas.
+4. **Dupla 2 debe usar verbos de ACCIÓN o ADVERTENCIA: "deberá enfrentar", "tendrá que soltar", "chocará con".**
 
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-3 oraciones concretas describiendo a la persona, adaptadas al ${tema}]</p>
+    <p>[1-2 oraciones fusionando la Persona (Carta 1) + Influencia (Carta 2) en una sola descripción continua.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones con verbos de acción o advertencia clara. Sé honesta sobre los desafíos.]</p>
+    <p>[1-2 oraciones con verbos de acción o advertencia clara. Sé honesta sobre los desafíos.]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión y Consejo</h3>
-    <p><span id="conclusion">[SÍNTESIS CONCRETA. Si el futuro es difícil, indica claramente qué debe cambiar el consultante para evitarlo. Ejemplo: "Para evitar este desgaste, es crucial que sueltes el control y ajustes tus expectativas ahora."]</span></p>
+    <p><span id="conclusion">[SÍNTESIS CONCRETA. Si el futuro es difícil, indica claramente qué debe cambiar el consultante para evitarlo.]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Si hay una advertencia, dila claramente para que pueda cambiar de rumbo.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Si hay una advertencia, dila claramente para que pueda cambiar de rumbo.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Sé concreto y honesto.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Aplica la REGLA DE FUSIÓN para la Dupla 1. Sé concreto y honesto.`;
         }
-
         // ==========================================
         // LLAMADA A LA API
         // ==========================================
