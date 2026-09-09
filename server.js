@@ -474,12 +474,27 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esPreguntaEspecifica = (tema === 'Pregunta Especifica' || tema === 'Pregunta Específica') && preguntaLimpia.length > 0;
         const esModoGratis = modo === 'gratis';
 
+        // ==========================================
+        // NUEVO: DETECTAR EL ENFOQUE DEL TEMA
+        // ==========================================
+        let enfoqueTema = "";
+        const temaLower = (tema || "").toLowerCase();
+        
+        if (temaLower.includes('amor') || temaLower.includes('relacion') || temaLower.includes('pareja') || temaLower.includes('sentimiento')) {
+            enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas específicamente en el contexto de AMOR, relaciones, vínculos emocionales, atracción y pareja.";
+        } else if (temaLower.includes('negocio') || temaLower.includes('dinero') || temaLower.includes('trabajo') || temaLower.includes('finanzas') || temaLower.includes('carrera')) {
+            enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas específicamente en el contexto de TRABAJO, negocios, finanzas, proyectos y éxito material.";
+        } else {
+            enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas en un contexto de VIDA GENERAL, bienestar, equilibrio y tendencias amplias de la vida.";
+        }
+
         let systemPrompt = '';
         let userPrompt = '';
         let temp = 0.7;
 
         if (esModoGratis) {
             systemPrompt = `Eres experta lectora de Tarot. Estilo humano, cálido, directo y CONCRETO.
+${enfoqueTema}
 
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS (adinerado, materialista, sensible, exitoso, feliz, intuitivo).
@@ -491,7 +506,7 @@ REGLAS ABSOLUTAS:
 7. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA, no estado estático.**
 
 VERBOS CORRECTOS PARA DUPLA 2 (FUTURO):
-- "avanzará", "atravesará", "logrará", "enfrentará", "superará","llegará", "alcanzará", "descubrirá", "recibirá"
+- "avanzará", "atravesará", "logrará", "enfrentará", "superará", "llegará", "alcanzará", "descubrirá", "recibirá"
 
 VERBOS PROHIBIDOS PARA DUPLA 2:
 - ❌ "sigue sintiendo", "se mantiene", "continúa", "permanece"
@@ -500,32 +515,25 @@ EJEMPLO PERFECTO (4 de Oros + 7 de Copas, luego Templanza + 10 de Copas):
 - Dupla 1: "Persona materialista que se vuelve más sensible."
 - Dupla 2: "Con tranquilidad y paciencia, logrará la felicidad familiar y social."
 
-EJEMPLO PERFECTO (El Carro + 9 de Espadas como Dupla 2):
-- "Persona que avanzará decidida y atravesará preocupaciones."
-
-OTROS EJEMPLOS:
-- "Llega un hombre exitoso que ofrecerá seguridad y compromiso."
-- "Persona intuitiva que recibirá claridad mental y cortará con la confusión."
-- "Pretendiente joven muestra interés."
-- "Una mujer serena aparecerá en tu camino trayendo paz."
-
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-3 oraciones concretas describiendo a la persona. Sé directo.]</p>
+    <p>[2-3 oraciones concretas describiendo a la persona, adaptadas al ${tema}. Sé directo.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará". NO estados estáticos.]</p>
+    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA, adaptadas al ${tema}. NO estados estáticos.]</p>
 </div>`;
 
-            userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
+            userPrompt = `Tema de consulta: ${tema}.
+Pregunta: "${preguntaLimpia || 'Consulta general'}"
 Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
-Describe a la persona con palabras CONCRETAS. La Dupla 2 debe usar verbos de acción futura. NO menciones las cartas.`;
+Describe a la persona con palabras CONCRETAS adaptadas al tema de ${tema}. La Dupla 2 debe usar verbos de acción futura. NO menciones las cartas.`;
 
         } else if (estilo === 'manual') {
             temp = 0.4;
             systemPrompt = `Diccionario técnico de Tarot. Estilo concreto y directo.
+${enfoqueTema}
 
 EJEMPLOS PERFECTOS:
 - "Persona materialista que se vuelve más sensible."
@@ -536,30 +544,32 @@ EJEMPLOS PERFECTOS:
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado:</strong> [2-3 oraciones concretas]</p>
-    <p><strong>Predicción:</strong> [2 oración con verbo de acción futura]</p>
+    <p><strong>Significado:</strong> [2-3 oraciones concretas adaptadas al ${tema}]</p>
+    <p><strong>Predicción:</strong> [2 oraciones con verbo de acción futura]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado:</strong> [2-3 oraciones con verbos de acción futura: "avanzará", "logrará", "enfrentará"]</p>
-    <p><strong>Predicción:</strong> [3 oración]</p>
+    <p><strong>Significado:</strong> [2-3 oraciones con verbos de acción futura adaptadas al ${tema}]</p>
+    <p><strong>Predicción:</strong> [3 oraciones]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2 con verbos de acción futura.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2 con verbos de acción futura.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto, adapta al tema. Dupla 2 con verbos de acción futura.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto, adapta al tema. Dupla 2 con verbos de acción futura.`;
 
         } else {
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `vidente experta. Estilo: místico, predictivo, concreto. Usas palabras directas y verbos de acción futura.`;
+                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto. Usas palabras directas y verbos de acción futura.`;
             } else {
                 temp = 0.6;
                 personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Describes la evolución de la persona con verbos de acción.`;
             }
 
             const reglasFormato = `
+${enfoqueTema}
+
 REGLAS ABSOLUTAS:
 1. Usa palabras CONCRETAS y DIRECTAS.
 2. NO uses frases abstractas.
@@ -569,31 +579,25 @@ REGLAS ABSOLUTAS:
 6. **Dupla 2 debe usar verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará", "alcanzará".**
 7. **PROHIBIDO en Dupla 2: "sigue sintiendo", "se mantiene", "continúa", "permanece".**
 
-EJEMPLOS PERFECTOS:
-- "Persona materialista que se vuelve más sensible."
-- "Con tranquilidad, logrará la felicidad familiar."
-- "Llega un hombre exitoso que ofrecerá seguridad."
-- "Persona que avanzará decidida y atravesará preocupaciones."
-
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[2-3 oraciones concretas describiendo a la persona]</p>
+    <p>[2-3 oraciones concretas describiendo a la persona, adaptadas al ${tema}]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará"]</p>
+    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA, adaptadas al ${tema}]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
-    <p><span id="conclusion">[SÍNTESIS CONCRETA de la persona y su evolución. Ejemplo: "Persona exitosa que enfrentará desafíos con entusiasmo."]</span></p>
+    <p><span id="conclusion">[SÍNTESIS CONCRETA de la persona y su evolución en el contexto de ${tema}. Ejemplo: "Persona exitosa que enfrentará desafíos laborales con entusiasmo."]</span></p>
 </div>`;
 
             systemPrompt = personalidad + reglasFormato;
             
             userPrompt = esPreguntaEspecifica 
-                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2 con verbos de acción futura. Conclusión describe a la PERSONA.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2, con verbos de acción futura. Conclusión describe a la PERSONA.`;
+                ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Adapta la interpretación al tema de la pregunta. Dupla 2 con verbos de acción futura.`
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Adapta la interpretación al tema de ${tema}. Dupla 2 con verbos de acción futura.`;
         }
 
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
