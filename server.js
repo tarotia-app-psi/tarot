@@ -512,11 +512,11 @@ OTROS EJEMPLOS:
 FORMATO (2 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones concretas describiendo a la persona. Sé directo.]</p>
+    <p>[2-3 oraciones concretas describiendo a la persona. Sé directo.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones con verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará". NO estados estáticos.]</p>
+    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará". NO estados estáticos.]</p>
 </div>`;
 
             userPrompt = `Pregunta: "${preguntaLimpia || 'Consulta general'}"
@@ -524,7 +524,7 @@ Cartas: Dupla 1 (${a} y ${b}), Dupla 2 (${c} y ${d}).
 Describe a la persona con palabras CONCRETAS. La Dupla 2 debe usar verbos de acción futura. NO menciones las cartas.`;
 
         } else if (estilo === 'manual') {
-            temp = 0.3;
+            temp = 0.4;
             systemPrompt = `Diccionario técnico de Tarot. Estilo concreto y directo.
 
 EJEMPLOS PERFECTOS:
@@ -536,13 +536,13 @@ EJEMPLOS PERFECTOS:
 FORMATO:
 <div class="reading-section">
     <h3>Dupla 1: Presente</h3>
-    <p><strong>Significado:</strong> [1-2 oraciones concretas]</p>
-    <p><strong>Predicción:</strong> [1 oración con verbo de acción futura]</p>
+    <p><strong>Significado:</strong> [2-3 oraciones concretas]</p>
+    <p><strong>Predicción:</strong> [2 oración con verbo de acción futura]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Futuro</h3>
-    <p><strong>Significado:</strong> [1-2 oraciones con verbos de acción futura: "avanzará", "logrará", "enfrentará"]</p>
-    <p><strong>Predicción:</strong> [1 oración]</p>
+    <p><strong>Significado:</strong> [2-3 oraciones con verbos de acción futura: "avanzará", "logrará", "enfrentará"]</p>
+    <p><strong>Predicción:</strong> [3 oración]</p>
 </div>`;
 
             userPrompt = esPreguntaEspecifica 
@@ -578,11 +578,11 @@ EJEMPLOS PERFECTOS:
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-2 oraciones concretas describiendo a la persona]</p>
+    <p>[2-3 oraciones concretas describiendo a la persona]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-2 oraciones con verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará"]</p>
+    <p>[2-3 oraciones con verbos de ACCIÓN FUTURA: "avanzará", "logrará", "enfrentará", "superará"]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión</h3>
@@ -593,7 +593,7 @@ FORMATO (3 secciones HTML):
             
             userPrompt = esPreguntaEspecifica 
                 ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2 con verbos de acción futura. Conclusión describe a la PERSONA.`
-                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2 con verbos de acción futura. Conclusión describe a la PERSONA.`;
+                : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto. Dupla 2, con verbos de acción futura. Conclusión describe a la PERSONA.`;
         }
 
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
