@@ -477,14 +477,25 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
          // ==========================================
         // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
+               // ==========================================
+        // DETECTAR EL ENFOQUE DEL TEMA (MEJORADO)
+        // ==========================================
         let enfoqueTema = "";
         const temaLower = (tema || "").toLowerCase();
         
-        if (temaLower.includes('amor') || temaLower.includes('relacion') || temaLower.includes('pareja') || temaLower.includes('sentimiento')) {
-            enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas específicamente en el contexto de AMOR, relaciones, vínculos emocionales, atracción y pareja.";
-        } else if (temaLower.includes('negocio') || temaLower.includes('dinero') || temaLower.includes('trabajo') || temaLower.includes('finanzas') || temaLower.includes('carrera')) {
+        if (temaLower.includes('pareja actual') || temaLower.includes('situacion') || temaLower.includes('relacion actual') || temaLower.includes('mi pareja')) {
+            enfoqueTema = "ENFOQUE OBLIGATORIO (PAREJA ACTUAL): Interpreta las cartas específicamente sobre la dinámica de la relación existente. Habla de comunicación, resolución de conflictos, lealtad, proyectos en común y la evolución de este vínculo. Asume que el consultante YA tiene pareja o está en una situación definida.";
+        } 
+        else if (temaLower.includes('nueva pareja') || temaLower.includes('conseguir') || temaLower.includes('soltero') || temaLower.includes('llegada') || temaLower.includes('posibilidad')) {
+            enfoqueTema = "ENFOQUE OBLIGATORIO (NUEVA PAREJA): Interpreta las cartas sobre la posibilidad de un nuevo amor. Habla de sanar el pasado, preparación personal, señales de que alguien llega, y el tipo de energía o persona que se atraerá. Asume que el consultante está buscando o abriéndose a un nuevo vínculo.";
+        } 
+        else if (temaLower.includes('amor') || temaLower.includes('relacion') || temaLower.includes('sentimiento')) {
+            enfoqueTema = "ENFOQUE OBLIGATORIO (AMOR GENERAL): Interpreta las cartas en un contexto amoroso amplio. Adapta el mensaje para que sea útil y aplicable tanto si el consultante tiene pareja como si está soltero, enfocándote en la energía emocional del momento.";
+        } 
+        else if (temaLower.includes('negocio') || temaLower.includes('dinero') || temaLower.includes('trabajo') || temaLower.includes('finanzas') || temaLower.includes('carrera')) {
             enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas específicamente en el contexto de TRABAJO, negocios, finanzas, proyectos y éxito material.";
-        } else {
+        } 
+        else {
             enfoqueTema = "ENFOQUE OBLIGATORIO: Interpreta las cartas en un contexto de VIDA GENERAL, bienestar, equilibrio y tendencias amplias de la vida.";
         }
 
