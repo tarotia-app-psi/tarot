@@ -650,11 +650,11 @@ EJEMPLOS INCORRECTOS (INSTRUCTIVOS - NO HAGAS ESTO):
 FORMATO (3 secciones HTML):
 <div class="reading-section">
     <h3>Dupla 1: Tu Presente</h3>
-    <p>[1-3 oraciones describiendo a la PERSONA con verbos descriptivos. NO des instrucciones.]</p>
+    <p>[2-3 oraciones describiendo a la PERSONA con verbos descriptivos. NO des instrucciones.]</p>
 </div>
 <div class="reading-section">
     <h3>Dupla 2: Tu Evolución Futura</h3>
-    <p>[1-3 oraciones describiendo a la PERSONA con verbos de acción futura descriptivos: "se pondrá", "enfrentará", "construirá". NO uses "deberá" o "debe".]</p>
+    <p>[2-3 oraciones describiendo a la PERSONA con verbos de acción futura descriptivos: "se pondrá", "enfrentará", "construirá". NO uses "deberá" o "debe".]</p>
 </div>
 <div class="reading-section">
     <h3>Conclusión y Consejo</h3>
