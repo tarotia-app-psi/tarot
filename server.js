@@ -491,7 +491,7 @@ REGLAS ABSOLUTAS:
 7. **Dupla 2 (Futuro) debe describir EVOLUCIÓN o ACCIÓN FUTURA, no estado estático.**
 
 VERBOS CORRECTOS PARA DUPLA 2 (FUTURO):
-- "avanzará", "atravesará", "logrará", "enfrentará", "superará", "alcanzará", "descubrirá", "recibirá"
+- "avanzará", "atravesará", "logrará", "enfrentará", "superará","llegará", "alcanzará", "descubrirá", "recibirá"
 
 VERBOS PROHIBIDOS PARA DUPLA 2:
 - ❌ "sigue sintiendo", "se mantiene", "continúa", "permanece"
@@ -501,12 +501,12 @@ EJEMPLO PERFECTO (4 de Oros + 7 de Copas, luego Templanza + 10 de Copas):
 - Dupla 2: "Con tranquilidad y paciencia, logrará la felicidad familiar y social."
 
 EJEMPLO PERFECTO (El Carro + 9 de Espadas como Dupla 2):
-- "Persona que avanzará decidida y atravesará preocupaciones con valentía."
+- "Persona que avanzará decidida y atravesará preocupaciones."
 
 OTROS EJEMPLOS:
 - "Llega un hombre exitoso que ofrecerá seguridad y compromiso."
 - "Persona intuitiva que recibirá claridad mental y cortará con la confusión."
-- "Viene alguien del pasado con intenciones renovadas."
+- "Pretendiente joven muestra interés."
 - "Una mujer serena aparecerá en tu camino trayendo paz."
 
 FORMATO (2 secciones HTML):
@@ -553,7 +553,7 @@ FORMATO:
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
-                personalidad = `Eres Morgana, vidente experta. Estilo: místico, predictivo, concreto. Usas palabras directas y verbos de acción futura.`;
+                personalidad = `vidente experta. Estilo: místico, predictivo, concreto. Usas palabras directas y verbos de acción futura.`;
             } else {
                 temp = 0.6;
                 personalidad = `Eres terapeuta experto en Tarot Evolutivo. Estilo: empático, concreto, humano. Describes la evolución de la persona con verbos de acción.`;
