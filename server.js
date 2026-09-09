@@ -474,7 +474,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         const esPreguntaEspecifica = (tema === 'Pregunta Especifica' || tema === 'Pregunta Específica') && preguntaLimpia.length > 0;
         const esModoGratis = modo === 'gratis';
 
-        // ==========================================
+         // ==========================================
         // DETECTAR EL ENFOQUE DEL TEMA
         // ==========================================
         let enfoqueTema = "";
@@ -551,7 +551,54 @@ FORMATO:
                 ? `Pregunta: "${preguntaLimpia}". Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Incluye advertencias si las cartas lo indican.`
                 : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Incluye advertencias si las cartas lo indican.`;
 
+        } else if (estilo === 'secuencial' || estilo === 'carta_por_carta') {
+            // ==========================================
+            // NUEVO ESTILO: SECUENCIAL (4 PASOS)
+            // ==========================================
+            temp = 0.7;
+            systemPrompt = `Eres experta lectora de Tarot. Estilo: Narrativo, claro, paso a paso y HONESTO.
+${enfoqueTema}
+
+REGLA ABSOLUTA: NO leas por duplas. Interpreta CADA CARTA en su posición específica según la estructura de 4 pasos.
+
+ESTRUCTURA OBLIGATORIA DE 4 PASOS:
+1. Carta 1 = Estado Actual (La energía base o situación presente).
+2. Carta 2 = La Influencia (Lo que afecta, presiona o motiva esa situación).
+3. Carta 3 = Actitud Futura (La acción, enfoque o desafío que se avecina en el corto plazo).
+4. Carta 4 = Resultado Final (Cómo desembocará todo si se mantiene la energía actual).
+
+REGLAS DE REDACCIÓN:
+- Usa palabras CONCRETAS y DIRECTAS. NO relleno psicológico.
+- Sé HONESTA: Si la Carta 4 indica un resultado difícil, ADVIERTE con claridad y da un consejo para cambiar el rumbo.
+- PROHIBIDO mencionar los nombres de las cartas en el texto.
+- PROHIBIDO fusionar las cartas como "duplas".
+
+FORMATO (4 secciones HTML):
+<div class="reading-section">
+    <h3>1. Tu Estado Actual</h3>
+    <p>[2 oraciones concretas describiendo la situación base, adaptadas al ${tema}.]</p>
+</div>
+<div class="reading-section">
+    <h3>2. La Influencia</h3>
+    <p>[2 oraciones concretas sobre qué o quién está afectando esta situación.]</p>
+</div>
+<div class="reading-section">
+    <h3>3. Actitud en el Futuro Próximo</h3>
+    <p>[2 oraciones con verbos de acción futura: "deberás enfrentar", "tomarás", "cambiarás".]</p>
+</div>
+<div class="reading-section">
+    <h3>4. Resultado Final y Consejo</h3>
+    <p><span id="conclusion">[2-3 oraciones sobre el desenlace. Si es negativo, indica claramente qué debe cambiar el consultante para evitarlo.]</span></p>
+</div>`;
+
+            userPrompt = esPreguntaEspecifica 
+                ? `Tema: ${tema}. Pregunta: "${preguntaLimpia}". Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé concreto y honesto.`
+                : `Tema: ${tema}. Cartas en orden: 1) ${a}, 2) ${b}, 3) ${c}, 4) ${d}. Interpreta cada una en su posición. Sé concreto y honesto.`;
+
         } else {
+            // ==========================================
+            // ESTILOS MÁGICO Y FILOSÓFICO (POR DUPLAS)
+            // ==========================================
             let personalidad = '';
             if (estilo === 'morgana' || estilo === 'magico') {
                 temp = 0.8;
@@ -596,6 +643,9 @@ FORMATO (3 secciones HTML):
                 : `Tema: ${tema}. Cartas: ${a}+${b}, ${c}+${d}. Sé concreto y honesto. Si hay una advertencia, dila claramente para que pueda cambiar de rumbo.`;
         }
 
+        // ==========================================
+        // LLAMADA A LA API
+        // ==========================================
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
