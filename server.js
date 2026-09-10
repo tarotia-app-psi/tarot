@@ -508,7 +508,7 @@ app.post('/tirada', tiradaLimiter, async (req, res) => {
         // ==========================================
         const reglaFusionDuplas = `
 REGLA DE FUSIÓN DE DUPLAS (OBLIGATORIA PARA AMBAS DUPLAS): 
-En CADA dupla, la primera carta representa a la PERSONA o estado base, y la segunda carta representa lo que la INFLUYE o modifica. 
+En CADA dupla, la primera carta representa a la PERSONA o estado base, y la segunda carta representa lo que la INFLUYE o su cambio. 
 DEBES FUSIONAR ambos conceptos en una sola frase descriptiva continua. NO leas las cartas por separado.
 EJEMPLO PERFECTO: 2 de Espadas + 7 de Copas = "Persona bloqueada que se pone a soñar o se llena de ilusiones."`;
 
